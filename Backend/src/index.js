@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
+import path from "path";
+import fs from "fs"
 
 dotenv.config(
     {
@@ -20,7 +22,7 @@ const PORT = process.env.PORT || 8000
 const HOST = process.env.HOST || '0.0.0.0'
 connectDB()
 .then(()=>{
-    app.listen(process.env.PORT || 8000,()=>{
+    const server = app.listen(process.env.PORT || 8000,()=>{
         console.log(`App is listening on PORT:${process.env.PORT || 8000}`)
     })
 
