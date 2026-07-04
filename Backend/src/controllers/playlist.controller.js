@@ -66,10 +66,78 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid playlist ID")
     }
 
-    const playlist = await Playlist.findById(playlistId)
+    const playlist = await Playlist.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(playlistId)
+            }
+        },
+        // Lookup the playlist owner details
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "ownerDetails",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullName: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        // Lookup the videos array
+        {
+            $lookup: {
+                from: "videos",
+                localField: "videos",
+                foreignField: "_id",
+                as: "videos",
+                pipeline: [
+                    // Nested lookup for each video's owner
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "ownerDetails",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        username: 1,
+                                        fullName: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    // Flatten the video's owner array using $first
+                    {
+                        $addFields: {
+                            ownerDetails: { $first: "$ownerDetails" }
+                        }
+                    }
+                ]
+            }
+        },
+        // Final data shaping at the root level
+        {
+            $addFields: {
+                // Flatten the playlist's owner array using $first
+                ownerDetails: { $first: "$ownerDetails" },
+                // Calculate the total videos dynamically using $size
+                totalVideos: { $size: "$videos" }
+            }
+        }
+    ]);
 
-    if(!playlist){
-        throw new ApiError(404, "Playlist not found")
+    if (!playlist?.length) {
+        throw new ApiError(404, "Playlist not found");
     }
 
     return res
