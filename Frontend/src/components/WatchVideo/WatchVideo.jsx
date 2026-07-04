@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { LuThumbsUp, LuThumbsDown, LuShare2 } from 'react-icons/lu';
+import { LuThumbsUp, LuThumbsDown, LuShare2, LuPlus } from 'react-icons/lu';
 import { useWatchVideo } from '../../hooks/Video/useWatchVideo.js';
 import VideoCard from '../VideoCard/VideoCard.jsx';
 import { useLikeVideos } from '../../hooks/Likes/useLikeVideo.js';
@@ -10,6 +10,10 @@ import CommentSkeleton from '../Skeleton/CommentSkeleton.jsx';
 import { useAddComment } from '../../hooks/Comments/useAddComment.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToggleSubscription } from '../../hooks/Subscription/useToggleSubscription.js';
+import { useGetUserPlaylists } from '../../hooks/Playlist/useGetUserPlaylists.js';
+import { useCreatePlaylist } from '../../hooks/Playlist/useCreatePlaylist.js';
+import { useAddVideoToPlaylist } from '../../hooks/Playlist/useAddVideoToPlaylist.js';
+import PlaylistSaveModal from '../PlaylistModal/PlaylistSaveModal.jsx';
 
 export default function WatchVideo() {
     const { videoId } = useParams();
@@ -33,7 +37,14 @@ export default function WatchVideo() {
         error: addCommentError
     } = useAddComment();
 
+    const { getUserPlaylists, loading: userPlaylistsLoading, error: userPlaylistsError, userPlaylists } = useGetUserPlaylists();
+    const { formData: playlistForm, handleChange: handlePlaylistChange, handleSubmit: handleCreatePlaylist, loading: creatingPlaylist, error: createPlaylistError, success: createPlaylistSuccess, createdPlaylist } = useCreatePlaylist();
+    const { addVideoToPlaylist, loading: addingToPlaylist, error: addToPlaylistError, success: addToPlaylistSuccess } = useAddVideoToPlaylist();
+
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+    const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
+    const [modalMessage, setModalMessage] = useState('');
 
     // --- LOCAL STATE OVERRIDES FOR OPTIMISTIC UI (Subscriptions) ---
     const [localIsSubscribed, setLocalIsSubscribed] = useState(false);
@@ -81,6 +92,63 @@ export default function WatchVideo() {
             setLocalSubCount(prev => result.isSubscribed ? prev + 1 : prev - 1);
         }
     };
+
+    const openPlaylistModal = () => {
+        setModalMessage('');
+        setIsPlaylistModalOpen(true);
+    };
+
+    const closePlaylistModal = () => {
+        setIsPlaylistModalOpen(false);
+        setSelectedPlaylistId(null);
+        setModalMessage('');
+    };
+
+    const handlePlaylistSelect = (playlistId) => {
+        setSelectedPlaylistId(playlistId);
+        setModalMessage('');
+    };
+
+    const handleAddVideo = async () => {
+        if (!video?._id) {
+            setModalMessage('Video data is not available yet.');
+            return;
+        }
+
+        if (!selectedPlaylistId) {
+            setModalMessage('Please select a playlist first.');
+            return;
+        }
+
+        setModalMessage('');
+        const result = await addVideoToPlaylist(video._id, selectedPlaylistId);
+
+        if (result) {
+            setModalMessage('Video added to playlist successfully.');
+        }
+    };
+
+    useEffect(() => {
+        if (user?._id) {
+            getUserPlaylists(user._id);
+        }
+    }, [user?._id]);
+
+    useEffect(() => {
+        if (createPlaylistSuccess && createdPlaylist) {
+            setSelectedPlaylistId(createdPlaylist._id);
+            setModalMessage(`Playlist "${createdPlaylist.name}" created. Select it to save the video.`);
+            if (user?._id) {
+                getUserPlaylists(user._id);
+            }
+        }
+    }, [createPlaylistSuccess, createdPlaylist, user?._id]);
+
+    useEffect(() => {
+        if (addToPlaylistSuccess) {
+            setModalMessage('Video added to playlist successfully.');
+        }
+    }, [addToPlaylistSuccess]);
 
     const avatarUrl = ownerData?.avatar || `https://ui-avatars.com/api/?name=${ownerData?.username || 'User'}&background=random`;
     const channelName = ownerData?.fullName || ownerData?.username || "Unknown Channel";
@@ -194,6 +262,9 @@ export default function WatchVideo() {
                                             <LuThumbsDown size={18} />
                                         </button>
                                     </div>
+                                    <button onClick={openPlaylistModal} className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap">
+                                        <LuPlus size={18} /> Save
+                                    </button>
                                     <button className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap">
                                         <LuShare2 size={18} /> Share
                                     </button>
@@ -293,6 +364,25 @@ export default function WatchVideo() {
                     </div>
                 </div>
             )}
+
+            <PlaylistSaveModal
+                isOpen={isPlaylistModalOpen}
+                onClose={closePlaylistModal}
+                playlistItems={userPlaylists}
+                selectedPlaylistId={selectedPlaylistId}
+                onSelectPlaylist={handlePlaylistSelect}
+                onSave={handleAddVideo}
+                saveLoading={addingToPlaylist}
+                modalMessage={modalMessage}
+                userPlaylistsLoading={userPlaylistsLoading}
+                userPlaylistsError={userPlaylistsError}
+                playlistForm={playlistForm}
+                onPlaylistFormChange={handlePlaylistChange}
+                onCreatePlaylistSubmit={handleCreatePlaylist}
+                creatingPlaylist={creatingPlaylist}
+                addToPlaylistError={addToPlaylistError}
+                createPlaylistError={createPlaylistError}
+            />
         </div>
     );
 }
