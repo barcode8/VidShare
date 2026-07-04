@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { LuListVideo, LuPlus, LuX } from 'react-icons/lu';
 import Sidebar from '../Sidebar/Sidebar.jsx';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Changed from Link to useNavigate
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useGetUserPlaylists } from '../../hooks/Playlist/useGetUserPlaylists.js';
 import { useCreatePlaylist } from '../../hooks/Playlist/useCreatePlaylist.js';
 import { useDeletePlaylist } from '../../hooks/Playlist/useDeletePlaylist.js';
 
 const Playlist = () => {
+    const navigate = useNavigate(); // Initialize useNavigate
     const { user } = useAuth();
     const { getUserPlaylists, loading: playlistLoading, error: playlistError, userPlaylists } = useGetUserPlaylists();
     const { formData, handleChange, handleSubmit, loading: creatingPlaylist, error: createError, success: createSuccess } = useCreatePlaylist();
@@ -112,21 +113,20 @@ const Playlist = () => {
                         {userPlaylists?.map((playlist) => (
                             <div
                                 key={playlist._id}
-                                className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-pink-500/40"
+                                onClick={() => navigate(`/playlists/${playlist._id}`)} // Added navigation here
+                                className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-pink-500/40 cursor-pointer" // Added cursor-pointer
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
                                 <div className="flex items-start justify-between gap-3">
-                                    <Link
-                                        to={`/playlists/${playlist._id}`}
-                                        className="relative block flex-1"
-                                    >
+                                    {/* Replaced Link with a standard div wrapper */}
+                                    <div className="relative block flex-1">
                                         <div>
                                             <h2 className="text-lg font-semibold text-white">{playlist.name}</h2>
                                             <p className="mt-2 text-sm text-zinc-400 line-clamp-2">
                                                 {playlist.description || 'No description yet'}
                                             </p>
                                         </div>
-                                    </Link>
+                                    </div>
 
                                     <div className="relative flex-shrink-0">
                                         <span className="inline-flex h-8 min-w-[56px] items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800/80 px-3 text-sm font-medium text-pink-400 transition-opacity duration-200 group-hover:opacity-0">
@@ -134,7 +134,10 @@ const Playlist = () => {
                                         </span>
                                         <button
                                             type="button"
-                                            onClick={() => handleDeleteClicked(playlist)}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevents click from triggering the card's navigation
+                                                handleDeleteClicked(playlist);
+                                            }}
                                             disabled={deletingPlaylist && deletingId === playlist._id}
                                             className="absolute inset-0 hidden items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 px-3 text-xs font-semibold text-white transition duration-200 group-hover:flex disabled:cursor-not-allowed disabled:opacity-50"
                                         >
