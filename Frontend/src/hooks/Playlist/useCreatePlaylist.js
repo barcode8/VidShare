@@ -38,6 +38,7 @@ export const useCreatePlaylist = ()=>{
                 withCredentials: true//Not using will cause the request to exclude the cookie, which the backend will then reject because of CORS
             })
             setSuccess(true)
+            setFormData({})
         } catch (error) {
             const trimmedError = {
                 statusCode: error.response?.status,
