@@ -19,6 +19,7 @@ import '@fontsource/roboto';
 import { AuthProvider } from './context/AuthContext.jsx'
 import SearchResult from './components/SearchResult/SearchResult.jsx'
 import MyChannel from './components/MyChannel/MyChannel.jsx'
+import Playlist from './components/Playlists/Playlist.jsx'
 
 const router= createBrowserRouter(
   //Defining all the routes in this section
@@ -41,6 +42,7 @@ const router= createBrowserRouter(
           <Route path='/channel/:username' element={<UserProfile/>}/>
           <Route path='/watch-history' element={<WatchHistory/>}/>
           <Route path='/liked-videos' element={<LikedVideos/>}/>
+          <Route path='/playlists' element={<Playlist/>}/>
           <Route path='/subscriptions' element={<Subscriptions/>}/>
           {/* This is the home component i.e. the component that will load by default when we are at the / path */}
           <Route index element={<Home />}/>

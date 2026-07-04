@@ -1,9 +1,9 @@
 import { 
     LuHouse, 
-    LuTrendingUp, 
     LuSquarePlay, 
     LuHistory, 
-    LuThumbsUp 
+    LuThumbsUp,
+    LuListVideo
 } from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 
@@ -15,6 +15,7 @@ export default function Sidebar() {
         { divider: true },
         { icon: <LuHistory size={20} />, label: "History", path: "/watch-history" }, 
         { icon: <LuThumbsUp size={20} />, label: "Liked Videos", path: "/liked-videos" },
+        { icon: <LuListVideo size={20} />, label: "Playlists", path: "/playlists" },
     ];
 
     return (
