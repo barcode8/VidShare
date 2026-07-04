@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LuListVideo, LuPlus, LuX } from 'react-icons/lu';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useGetUserPlaylists } from '../../hooks/Playlist/useGetUserPlaylists.js';
 import { useCreatePlaylist } from '../../hooks/Playlist/useCreatePlaylist.js';
@@ -80,8 +81,9 @@ const Playlist = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {userPlaylists?.map((playlist) => (
-                            <div
+                            <Link
                                 key={playlist._id}
+                                to={`/playlists/${playlist._id}`}
                                 className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-pink-500/40"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -107,7 +109,7 @@ const Playlist = () => {
                                         ) : null}
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
