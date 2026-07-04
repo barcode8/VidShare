@@ -136,7 +136,7 @@ const Playlist = () => {
                                             type="button"
                                             onClick={() => handleDeleteClicked(playlist)}
                                             disabled={deletingPlaylist && deletingId === playlist._id}
-                                            className="absolute inset-0 hidden items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 px-3 text-xs font-semibold text-white transition duration-200 group-hover:flex disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="absolute inset-0 hidden items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 px-3 text-xs font-semibold text-white transition duration-200 group-hover:flex disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {deletingPlaylist && deletingId === playlist._id ? 'Deleting...' : 'Delete'}
                                         </button>
@@ -157,6 +157,7 @@ const Playlist = () => {
                 )}
             </div>
 
+            {/* Create Playlist Modal */}
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
                     <div
@@ -229,6 +230,7 @@ const Playlist = () => {
                 </div>
             )}
 
+            {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
                     <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-purple-950/30" onClick={(e) => e.stopPropagation()}>
@@ -259,7 +261,7 @@ const Playlist = () => {
                             <button
                                 onClick={handleConfirmDelete}
                                 disabled={deletingPlaylist && deletingId === deleteTarget?._id}
-                                className="rounded-full bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:from-purple-700 hover:to-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="rounded-full bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {deletingPlaylist && deletingId === deleteTarget?._id ? 'Deleting...' : 'Delete playlist'}
                             </button>
