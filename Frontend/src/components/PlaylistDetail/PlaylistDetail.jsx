@@ -1,13 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { LuListVideo } from 'react-icons/lu';
+import { LuListVideo, LuTrash } from 'react-icons/lu';
 import Sidebar from '../Sidebar/Sidebar.jsx';
 import VideoCard from '../VideoCard/VideoCard.jsx';
 import { useGetPlaylistById } from '../../hooks/Playlist/useGetPlaylistById.js';
+import { useRemoveVideoFromPlaylist } from '../../hooks/Playlist/useRemoveVideoFromPlaylist.js';
 
 const PlaylistDetail = () => {
     const { playlistId } = useParams();
     const { getPlaylistById, loading, error, playlist } = useGetPlaylistById();
+    const { removeVideoFromPlaylist, loading: removeLoading } = useRemoveVideoFromPlaylist();
+
+    const [videoToRemove, setVideoToRemove] = useState(null);
 
     useEffect(() => {
         if (playlistId) {
@@ -15,8 +19,19 @@ const PlaylistDetail = () => {
         }
     }, [playlistId]);
 
+    const handleConfirmRemove = async () => {
+        if (!videoToRemove) return;
+        
+        const success = await removeVideoFromPlaylist(videoToRemove, playlistId);
+        if (success) {
+            // Re-fetch the playlist to reflect the removed video
+            getPlaylistById(playlistId);
+        }
+        setVideoToRemove(null);
+    };
+
     return (
-        <div className="flex min-h-screen bg-black w-full pt-20">
+        <div className="flex min-h-screen bg-black w-full pt-20 relative">
             <Sidebar />
 
             <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)]">
@@ -76,11 +91,48 @@ const PlaylistDetail = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {playlist.videos.map((video) => (
-                            <VideoCard key={video._id} video={video} />
+                            <div key={video._id} className="flex flex-col gap-3 bg-zinc-900/40 p-3 rounded-2xl border border-zinc-800 transition-all hover:bg-zinc-900/80">
+                                <VideoCard video={video} />
+                                <button
+                                    onClick={() => setVideoToRemove(video._id)}
+                                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-red-100 text-red-900 font-semibold hover:bg-red-200 transition-colors shadow-sm"
+                                >
+                                    <LuTrash size={18} />
+                                    Remove from Playlist
+                                </button>
+                            </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* Custom Confirmation Modal */}
+            {videoToRemove && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-2">Remove Video</h3>
+                        <p className="text-zinc-400 text-sm mb-6">
+                            Are you sure you want to remove this video from your playlist? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setVideoToRemove(null)}
+                                disabled={removeLoading}
+                                className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmRemove}
+                                disabled={removeLoading}
+                                className="px-4 py-2 rounded-xl bg-red-100 text-red-900 font-semibold hover:bg-red-200 transition-colors flex items-center justify-center min-w-[100px] disabled:opacity-70"
+                            >
+                                {removeLoading ? 'Removing...' : 'Remove'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
