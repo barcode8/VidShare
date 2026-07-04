@@ -15,6 +15,7 @@ import UserProfile from './components/UserProfile/UserProfile.jsx'
 import WatchHistory from './components/WatchHistory/WatchHistory.jsx'
 import LikedVideos from './components/LikedVideos/LikedVideos.jsx'
 import Subscriptions from './components/Subscriptions/Subscriptions.jsx'
+import PlaylistDetail from './components/PlaylistDetail/PlaylistDetail.jsx'
 import '@fontsource/roboto'; 
 import { AuthProvider } from './context/AuthContext.jsx'
 import SearchResult from './components/SearchResult/SearchResult.jsx'
@@ -43,6 +44,7 @@ const router= createBrowserRouter(
           <Route path='/watch-history' element={<WatchHistory/>}/>
           <Route path='/liked-videos' element={<LikedVideos/>}/>
           <Route path='/playlists' element={<Playlist/>}/>
+          <Route path='/playlists/:playlistId' element={<PlaylistDetail/>}/>
           <Route path='/subscriptions' element={<Subscriptions/>}/>
           {/* This is the home component i.e. the component that will load by default when we are at the / path */}
           <Route index element={<Home />}/>

@@ -16,8 +16,9 @@ export const useGetPlaylistById = ()=>{
                 withCredentials : true
             })
 
-            setSuccess(true)
-            setPlaylist(res.data.data)
+            const payload = res.data.data;
+            const playlistData = Array.isArray(payload) ? payload[0] : payload;
+            setPlaylist(playlistData || null)
         } catch (err) {
             const errorMessage = err.response?.data?.message || "Failed to fetch playlist";
             console.error(errorMessage);
