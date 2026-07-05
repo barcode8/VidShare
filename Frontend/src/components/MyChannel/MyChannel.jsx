@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { LuPencil, LuTrash2, LuEyeOff, LuEye } from 'react-icons/lu';
+import { LuPencil, LuTrash2, LuEyeOff, LuEye, LuX } from 'react-icons/lu';
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import { formatDuration } from '../../utils/formatTime.js';
 import Sidebar from '../Sidebar/Sidebar.jsx';
@@ -22,14 +22,71 @@ const fadeUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
 };
 
+// Reusable Custom Modal Component
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText, confirmStyle, isLoading }) => {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
+                    onClick={onClose}
+                >
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
+                        className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl shadow-purple-950/20"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold text-white">{title}</h2>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+                            >
+                                <LuX size={20} />
+                            </button>
+                        </div>
+                        <p className="text-sm text-zinc-400 leading-relaxed">{message}</p>
+                        
+                        <div className="mt-8 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                            <button
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="rounded-full border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-800 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onConfirm}
+                                disabled={isLoading}
+                                className={`rounded-full px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-60 disabled:cursor-not-allowed ${confirmStyle}`}
+                            >
+                                {isLoading ? 'Processing...' : confirmText}
+                            </button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+};
+
 export default function MyChannel() {
     const { user } = useAuth();
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
     const { togglePublish, isToggling } = useTogglePublish();
-    
-    // 2. Initialize the delete hook
     const { deleteVideo, loading: isDeleting, error: deleteError } = useDeleteVideo();
+
+    // Modal States
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, videoId: null });
+    const [visibilityModal, setVisibilityModal] = useState({ isOpen: false, video: null });
 
     useEffect(() => {
         const fetchMyVideos = async () => {
@@ -53,27 +110,36 @@ export default function MyChannel() {
         }
     }, [user]);
 
-    const handleToggleVisibility = async (video) => {
-        const currentState = video.isPublished ? 'Public' : 'Hidden';
-        const oppositeState = video.isPublished ? 'Hidden' : 'Public';
-        
-        if (window.confirm(`Your video is currently ${currentState}, would you like to make it ${oppositeState}?`)) {
-            const newStatus = await togglePublish(video._id);
-            if (newStatus !== null) {
-                setVideos(videos.map(v => v._id === video._id ? { ...v, isPublished: newStatus } : v));
-            }
-        }
+    // Visibility Handlers
+    const openVisibilityModal = (video) => {
+        setVisibilityModal({ isOpen: true, video });
     };
 
-    // Delete handler
-    const handleDeleteVideo = async (videoId) => {
-        if (window.confirm("Are you sure you want to delete this video? This action cannot be undone.")) {
-            const data = await deleteVideo(videoId);
-            if (data) {
-                // Remove the deleted video from the UI instantly
-                setVideos(videos.filter(v => v._id !== videoId));
-            }
+    const confirmToggleVisibility = async () => {
+        const video = visibilityModal.video;
+        if (!video) return;
+
+        const newStatus = await togglePublish(video._id);
+        if (newStatus !== null) {
+            setVideos(videos.map(v => v._id === video._id ? { ...v, isPublished: newStatus } : v));
         }
+        setVisibilityModal({ isOpen: false, video: null });
+    };
+
+    // Delete Handlers
+    const openDeleteModal = (videoId) => {
+        setDeleteModal({ isOpen: true, videoId });
+    };
+
+    const confirmDelete = async () => {
+        const videoId = deleteModal.videoId;
+        if (!videoId) return;
+
+        const data = await deleteVideo(videoId);
+        if (data) {
+            setVideos(videos.filter(v => v._id !== videoId));
+        }
+        setDeleteModal({ isOpen: false, videoId: null });
     };
 
     if (!user) return null;
@@ -86,7 +152,7 @@ export default function MyChannel() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="flex-1 overflow-y-auto h-[calc(100vh-64px)] text-white"
+                className="flex-1 overflow-y-auto h-[calc(100vh-64px)] text-white relative"
             >
                 {/* Banner Section */}
                 <motion.div variants={fadeUp} className="w-full h-40 md:h-56 lg:h-72 bg-zinc-900 relative">
@@ -101,7 +167,7 @@ export default function MyChannel() {
                     )}
                 </motion.div>
 
-                {/* Profile Info Section (Flattened UI) */}
+                {/* Profile Info Section */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
                     <motion.div variants={fadeUp} className="flex flex-col md:flex-row items-center md:items-center gap-6 mb-10">
                         <img
@@ -174,18 +240,15 @@ export default function MyChannel() {
                                                     </button>
                                                 </Link>
                                                 <button 
-                                                    onClick={() => handleToggleVisibility(video)}
-                                                    disabled={isToggling}
-                                                    title={video.isPublished ? "Make Hidden" : "Make Public"}
-                                                    className="p-3 bg-zinc-600 hover:bg-zinc-500 rounded-full text-white transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    onClick={() => openVisibilityModal(video)}
+                                                    className="p-3 bg-zinc-600 hover:bg-zinc-500 rounded-full text-white transition-transform hover:scale-110"
                                                 >
                                                     {video.isPublished ? <LuEye size={20} /> : <LuEyeOff size={20} />}
                                                 </button>
                                                 
                                                 <button 
-                                                    onClick={() => handleDeleteVideo(video._id)}
-                                                    disabled={isDeleting}
-                                                    className="p-3 bg-red-600 hover:bg-red-500 rounded-full text-white transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    onClick={() => openDeleteModal(video._id)}
+                                                    className="p-3 bg-red-600 hover:bg-red-500 rounded-full text-white transition-transform hover:scale-110"
                                                 >
                                                     <LuTrash2 size={20} />
                                                 </button>
@@ -226,6 +289,29 @@ export default function MyChannel() {
                     </div>
                 </div>
             </motion.main>
+
+            {/* Modals */}
+            <ConfirmationModal
+                isOpen={visibilityModal.isOpen}
+                onClose={() => setVisibilityModal({ isOpen: false, video: null })}
+                onConfirm={confirmToggleVisibility}
+                isLoading={isToggling}
+                title="Change Visibility"
+                message={`Your video is currently ${visibilityModal.video?.isPublished ? 'Public' : 'Hidden'}. Would you like to make it ${visibilityModal.video?.isPublished ? 'Hidden' : 'Public'}?`}
+                confirmText={visibilityModal.video?.isPublished ? "Make Hidden" : "Make Public"}
+                confirmStyle="bg-zinc-600 hover:bg-zinc-500"
+            />
+
+            <ConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, videoId: null })}
+                onConfirm={confirmDelete}
+                isLoading={isDeleting}
+                title="Delete Video"
+                message="Are you absolutely sure you want to delete this video? This action is permanent and cannot be undone."
+                confirmText="Yes, Delete Video"
+                confirmStyle="bg-red-600 hover:bg-red-500"
+            />
         </div>
     );
 }
