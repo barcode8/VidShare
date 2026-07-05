@@ -42,6 +42,7 @@ import subscriptionRouter from "./routes/subscription.routes.js"
 import healthCheckRouter from "./routes/healthcheck.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
+import viewRouter from "./routes/view.routes.js"
 
 //Implementing routes
 app.use("/api/v1/healthcheck", healthCheckRouter)
@@ -52,5 +53,6 @@ app.use("/api/v1/comments", commentRouter)
 app.use("/api/v1/subscriptions", subscriptionRouter)
 app.use("/api/v1/playlist", playlistRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
+app.use("/api/v1/view", viewRouter)
 
 export {app};
