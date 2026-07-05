@@ -174,6 +174,14 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You do not have permission to modify this playlist")
     }
 
+    const videoExists = playlist.videos.some(
+        (id) => id.toString() === videoId
+    );
+
+    if (videoExists) {
+        throw new ApiError(400, "This video is already in the playlist");
+    }
+
     const updatedPlaylist = await Playlist.findOneAndUpdate(
         {
             _id : playlistId,
