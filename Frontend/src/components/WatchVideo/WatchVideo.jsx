@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LuThumbsUp, LuThumbsDown, LuShare2, LuPlus } from 'react-icons/lu';
 import { useWatchVideo } from '../../hooks/Video/useWatchVideo.js';
@@ -14,6 +14,7 @@ import { useGetUserPlaylists } from '../../hooks/Playlist/useGetUserPlaylists.js
 import { useCreatePlaylist } from '../../hooks/Playlist/useCreatePlaylist.js';
 import { useAddVideoToPlaylist } from '../../hooks/Playlist/useAddVideoToPlaylist.js';
 import PlaylistSaveModal from '../PlaylistModal/PlaylistSaveModal.jsx';
+import { useRecordView } from '../../hooks/Views/useRecordView.js';
 
 export default function WatchVideo() {
     const { videoId } = useParams();
@@ -21,6 +22,11 @@ export default function WatchVideo() {
     const { video, setVideo, recommendedVideos, loading, error } = useWatchVideo(videoId);
     const { toggleVideoLike, isToggling, toggleError } = useLikeVideos();
     const { toggleSubscription, isToggling: isSubscribing, toggleError: subscriptionError } = useToggleSubscription();
+    
+    // Initialize the View Recording hook
+    const { recordView } = useRecordView();
+    // Create a mutable reference lock to ensure the API call only fires once per video view
+    const hasLoggedView = useRef(false);
 
     const { 
         comments, 
@@ -64,9 +70,29 @@ export default function WatchVideo() {
             setLocalIsSubscribed(ownerData.isSubscribed || false);
             setLocalSubCount(ownerData.subscribersCount || 0);
         }
-    }, [video]); // Depend on video object so it runs when video data arrives
+    }, [video]); 
+
+    // Reset the view lock if the URL changes (e.g., user clicks a recommended video)
+    useEffect(() => {
+        hasLoggedView.current = false;
+    }, [videoId]);
 
     // Handlers
+    const handleTimeUpdate = (e) => {
+        // If the view has already been recorded for this video, do nothing
+        if (hasLoggedView.current) return;
+
+        const currentTime = e.target.currentTime;
+        const VIEW_THRESHOLD = 10; // Trigger view count after 10 seconds of watch time
+        
+
+        if (currentTime >= VIEW_THRESHOLD && video?._id) {
+            // Lock it so it doesn't fire continuously
+            hasLoggedView.current = true;
+            recordView(video._id);
+        }
+    };
+
     const handleLikeToggle = async (e) => {
         e.stopPropagation(); 
         if (!video?._id || isToggling) return;
@@ -83,7 +109,7 @@ export default function WatchVideo() {
     };
 
     const handleSubscribeToggle = async () => {
-        if (!ownerData?._id) return; // Failsafe
+        if (!ownerData?._id) return; 
 
         const result = await toggleSubscription(ownerData._id);
 
@@ -206,7 +232,14 @@ export default function WatchVideo() {
                     
                     <div className="flex-1 min-w-0 max-w-[1280px]">
                         <div className="relative w-full rounded-xl overflow-hidden bg-zinc-900 aspect-video">
-                            <video src={video.videoFile} poster={video.thumbnail} controls autoPlay className="w-full h-full object-contain">
+                            <video 
+                                src={video.videoFile} 
+                                poster={video.thumbnail} 
+                                controls 
+                                autoPlay 
+                                onTimeUpdate={handleTimeUpdate} // <-- Added listener here
+                                className="w-full h-full object-contain"
+                            >
                                 Your browser does not support the video tag.
                             </video>
                         </div>
@@ -225,7 +258,6 @@ export default function WatchVideo() {
                                     <p className="text-zinc-400 text-xs md:text-sm">{localSubCount} subscribers</p>
                                 </div>
                                 
-                                {/* Upgraded Subscription Button Block (White Style) */}
                                 <div className="flex flex-col">
                                     <button 
                                         onClick={handleSubscribeToggle}
