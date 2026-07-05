@@ -5,9 +5,11 @@ import Sidebar from '../Sidebar/Sidebar.jsx';
 import VideoCard from '../VideoCard/VideoCard.jsx';
 import { useGetPlaylistById } from '../../hooks/Playlist/useGetPlaylistById.js';
 import { useRemoveVideoFromPlaylist } from '../../hooks/Playlist/useRemoveVideoFromPlaylist.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const PlaylistDetail = () => {
     const { playlistId } = useParams();
+    const { user } = useAuth(); // Get the current logged-in user
     const { getPlaylistById, loading, error, playlist } = useGetPlaylistById();
     const { removeVideoFromPlaylist, loading: removeLoading } = useRemoveVideoFromPlaylist();
 
@@ -29,6 +31,12 @@ const PlaylistDetail = () => {
         }
         setVideoToRemove(null);
     };
+
+    // Create a boolean check to verify if the current user owns the playlist
+    // We check both playlist.owner and playlist.owner._id in case the backend populates the owner field
+    const isOwner = user?._id && playlist?.owner && (
+        user._id === playlist.owner || user._id === playlist.owner._id
+    );
 
     return (
         <div className="flex min-h-screen bg-black w-full pt-20 relative">
@@ -93,13 +101,17 @@ const PlaylistDetail = () => {
                         {playlist.videos.map((video) => (
                             <div key={video._id} className="flex flex-col gap-3 bg-zinc-900/40 p-3 rounded-2xl border border-zinc-800 transition-all hover:bg-zinc-900/80">
                                 <VideoCard video={video} />
-                                <button
-                                    onClick={() => setVideoToRemove(video._id)}
-                                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-red-100 text-red-900 font-semibold hover:bg-red-200 transition-colors shadow-sm"
-                                >
-                                    <LuTrash size={18} />
-                                    Remove from Playlist
-                                </button>
+                                
+                                {/* 4. Conditionally render the button based on the isOwner check */}
+                                {isOwner && (
+                                    <button
+                                        onClick={() => setVideoToRemove(video._id)}
+                                        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-red-100 text-red-900 font-semibold hover:bg-red-200 transition-colors shadow-sm"
+                                    >
+                                        <LuTrash size={18} />
+                                        Remove from Playlist
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
