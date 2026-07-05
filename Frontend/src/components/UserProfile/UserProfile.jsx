@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from '../Sidebar/Sidebar.jsx';
 import VideoCard from '../VideoCard/VideoCard.jsx';
@@ -7,9 +7,9 @@ import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import { useUserProfile } from '../../hooks/User/useUserProfile.js';
 import { useToggleSubscription } from '../../hooks/Subscription/useToggleSubscription.js';
 import { useDashboard } from '../../hooks/Dashboard/useDashboard.js';
+import { useGetUserPlaylists } from '../../hooks/Playlist/useGetUserPlaylists.js';
 
 // --- Framer Motion Variants ---
-// We define these outside the component to keep the code clean
 const fadeUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
@@ -51,6 +51,15 @@ export default function UserProfile() {
         getDashboardData 
     } = useDashboard();
     
+    // --- Playlists Hook Integration ---
+    const {
+        getUserPlaylists,
+        loading: playlistsLoading,
+        error: playlistsError,
+        success: playlistsSuccess,
+        userPlaylists
+    } = useGetUserPlaylists();
+    
     const [activeTab, setActiveTab] = useState("videos");
     const [localIsSubscribed, setLocalIsSubscribed] = useState(false);
     const [localSubCount, setLocalSubCount] = useState(0);
@@ -75,6 +84,14 @@ export default function UserProfile() {
         setActiveTab("about");
         if (!dashboardData && channel?._id) {
             getDashboardData(channel._id);
+        }
+    };
+
+    const handlePlaylistsClick = () => {
+        setActiveTab("playlists");
+        // Only fetch if we haven't successfully fetched yet to save network requests
+        if (!playlistsSuccess && channel?._id) {
+            getUserPlaylists(channel._id);
         }
     };
 
@@ -105,7 +122,6 @@ export default function UserProfile() {
                 )}
 
                 {!profileLoading && !profileError && channel && (
-                    // Stagger the entire profile content (Banner -> Info -> Tabs -> Content)
                     <motion.div 
                         variants={staggerContainer} 
                         initial="hidden" 
@@ -188,6 +204,17 @@ export default function UserProfile() {
                                         )}
                                     </button>
                                     <button 
+                                        onClick={handlePlaylistsClick}
+                                        className={`pb-3 font-medium px-1 transition-colors relative ${
+                                            activeTab === "playlists" ? "text-white" : "text-zinc-400 hover:text-white"
+                                        }`}
+                                    >
+                                        Playlists
+                                        {activeTab === "playlists" && (
+                                            <motion.div layoutId="activeTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+                                        )}
+                                    </button>
+                                    <button 
                                         onClick={handleAboutClick}
                                         className={`pb-3 font-medium px-1 transition-colors relative ${
                                             activeTab === "about" ? "text-white" : "text-zinc-400 hover:text-white"
@@ -204,11 +231,12 @@ export default function UserProfile() {
                             {/* 4. Dynamic Content Area */}
                             <motion.div variants={fadeUp} className="mt-6">
                                 <AnimatePresence mode="wait">
+                                    
                                     {/* VIDEOS TAB */}
                                     {activeTab === "videos" && (
                                         <motion.div key="videos" variants={tabContentFade} initial="hidden" animate="enter" exit="exit">
                                             {videoError && (
-                                                <div className="py-10 text-center text-red-400 bg-red-500/10 rounded-xl">
+                                                <div className="py-10 text-center text-red-400 bg-red-500/10 rounded-xl border border-red-500/20">
                                                     {videoError}
                                                 </div>
                                             )}
@@ -244,6 +272,65 @@ export default function UserProfile() {
                                         </motion.div>
                                     )}
 
+                                    {/* PLAYLISTS TAB */}
+                                    {activeTab === "playlists" && (
+                                        <motion.div key="playlists" variants={tabContentFade} initial="hidden" animate="enter" exit="exit">
+                                            {playlistsError && (
+                                                <div className="py-10 text-center text-red-400 bg-red-500/10 rounded-xl border border-red-500/20">
+                                                    {playlistsError}
+                                                </div>
+                                            )}
+
+                                            {playlistsLoading && !playlistsError && (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    {Array(3).fill(0).map((_, i) => (
+                                                        <div key={i} className="h-36 bg-zinc-900 rounded-2xl animate-pulse border border-zinc-800"></div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {!playlistsLoading && !playlistsError && (
+                                                <>
+                                                    {userPlaylists?.length > 0 ? (
+                                                        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                            {userPlaylists.map((playlist) => (
+                                                                <motion.div key={playlist._id} variants={fadeUp} whileHover={{ y: -4 }}>
+                                                                    <Link 
+                                                                        to={`/playlists/${playlist._id}`} 
+                                                                        className="block h-full bg-[#121212] border border-zinc-800 p-6 rounded-2xl flex flex-col transition-all hover:bg-zinc-900 hover:border-pink-500/30 hover:shadow-lg hover:shadow-pink-500/5 group"
+                                                                    >
+                                                                        <div className="flex justify-between items-start mb-3 gap-4">
+                                                                            <h3 className="text-white font-bold text-lg line-clamp-1 break-all group-hover:text-pink-100 transition-colors">
+                                                                                {playlist.name}
+                                                                            </h3>
+                                                                            <span className="bg-pink-500/10 text-pink-500 border border-pink-500/20 text-xs font-bold px-3 py-1 rounded-full shrink-0">
+                                                                                {playlist.videos?.length || 0}
+                                                                            </span>
+                                                                        </div>
+                                                                        <p className="text-zinc-400 text-sm mb-6 line-clamp-2 leading-relaxed">
+                                                                            {playlist.description || "No description provided."}
+                                                                        </p>
+                                                                        <div className="mt-auto flex justify-between items-center text-xs text-zinc-500 font-medium pt-4 border-t border-zinc-800/50">
+                                                                            <span>{playlist.videos?.length || 0} videos</span>
+                                                                            <span>{new Date(playlist.createdAt).toLocaleDateString()}</span>
+                                                                        </div>
+                                                                    </Link>
+                                                                </motion.div>
+                                                            ))}
+                                                        </motion.div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
+                                                            <svg className="w-16 h-16 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                                            </svg>
+                                                            <p className="text-lg font-medium text-zinc-400">This channel has no playlists.</p>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </motion.div>
+                                    )}
+
                                     {/* ABOUT TAB */}
                                     {activeTab === "about" && (
                                         <motion.div key="about" variants={tabContentFade} initial="hidden" animate="enter" exit="exit" className="max-w-5xl">
@@ -258,7 +345,7 @@ export default function UserProfile() {
                                             )}
                                             
                                             {dashError && (
-                                                <p className="text-red-500 bg-red-500/10 p-4 rounded-xl">{dashError}</p>
+                                                <p className="text-red-500 bg-red-500/10 border border-red-500/20 p-4 rounded-xl">{dashError}</p>
                                             )}
                                             
                                             {!dashLoading && !dashError && dashboardData && (
