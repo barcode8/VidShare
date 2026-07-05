@@ -21,6 +21,12 @@ export default function PlaylistSaveModal({
 }) {
     if (!isOpen) return null;
 
+    // Dynamically style the general modal message based on its content (Success vs Warning)
+    const isSuccessMessage = modalMessage?.toLowerCase().includes('success') || modalMessage?.toLowerCase().includes('created');
+    const messageStyle = isSuccessMessage
+        ? "bg-green-500/10 border border-green-500/20 text-green-400"
+        : "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"; // For warnings like "Please select a playlist"
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
             <div className="w-full max-w-2xl rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl shadow-purple-950/40" onClick={(e) => e.stopPropagation()}>
@@ -89,11 +95,33 @@ export default function PlaylistSaveModal({
                             </div>
                         </div>
 
+                        {/* --- UPDATED STATUS BOX --- */}
                         <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-5">
                             <h3 className="text-lg font-semibold text-white">Status</h3>
-                            <p className="mt-2 text-sm text-zinc-400">{modalMessage || 'Select a playlist and tap save.'}</p>
-                            {addToPlaylistError && <p className="mt-3 rounded-2xl bg-red-600/10 p-3 text-sm text-red-300">{addToPlaylistError}</p>}
-                            {createPlaylistError && <p className="mt-3 rounded-2xl bg-red-600/10 p-3 text-sm text-red-300">{createPlaylistError}</p>}
+                            
+                            {/* Default Message */}
+                            {!modalMessage && !addToPlaylistError && !createPlaylistError && (
+                                <p className="mt-2 text-sm text-zinc-400">Select a playlist and tap save.</p>
+                            )}
+
+                            {/* Success / Warning Messages */}
+                            {modalMessage && (
+                                <p className={`mt-3 rounded-2xl p-3 text-sm ${messageStyle}`}>
+                                    {modalMessage}
+                                </p>
+                            )}
+
+                            {/* Explicit Error Messages from the Backend (Duplicate checks) */}
+                            {addToPlaylistError && (
+                                <p className="mt-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+                                    {addToPlaylistError}
+                                </p>
+                            )}
+                            {createPlaylistError && (
+                                <p className="mt-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+                                    {createPlaylistError}
+                                </p>
+                            )}
                         </div>
                     </div>
 
