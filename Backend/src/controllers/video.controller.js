@@ -154,7 +154,10 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
         // 1. Upload Video
         const videoUpload = await uploadOnCloudinary(videoLocalPath, true);
 
-        if (!videoUpload) {
+        const videoUrl = videoUpload?.secure_url || videoUpload?.url;
+
+        if (!videoUpload || !videoUrl) {
+            console.error("Cloudinary response:", videoUpload)
             await Video.findByIdAndDelete(videoId);
             return;
         }
@@ -162,7 +165,7 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
         if(videoUpload.duration > 3600){
             await cloudinary.uploader.destroy(videoUpload.public_id, { resource_type: "video" });
             await Video.findByIdAndDelete(videoId);
-            if (fs.existsSync(thumbnailLocalPath)) fs.unlinkSync(thumbnailLocalPath);
+            if (thumbnailLocalPath && fs.existsSync(thumbnailLocalPath)) fs.unlinkSync(thumbnailLocalPath);
             console.error(`Video ${videoId} rejected: Exceeded 1 hour limit.`);
             return;
         }
@@ -172,25 +175,35 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
 
         if (thumbnailLocalPath) {
             const thumbnailUpload = await uploadOnCloudinary(thumbnailLocalPath);
-            finalThumbnailUrl = thumbnailUpload?.url || "";
+            finalThumbnailUrl = thumbnailUpload?.secure_url || thumbnailUpload?.url || "";
         } else {
-            // Auto-thumbnail trick
-            const splitUrl = videoUpload.url.split("/upload/");
-            finalThumbnailUrl = `${splitUrl[0]}/upload/so_auto/${splitUrl[1].replace(".mp4", ".jpg")}`;
+            // Auto-thumbnail logic
+            if (videoUrl.includes("/upload/")) {
+                const splitUrl = videoUrl.split("/upload/");
+                finalThumbnailUrl = `${splitUrl[0]}/upload/so_auto/${splitUrl[1].replace(".mp4", ".jpg")}`;
+            } else {
+                finalThumbnailUrl = videoUrl; 
+            }
         }
 
         // 3. Update ONLY the media fields and publish status
         await Video.findByIdAndUpdate(videoId, {
-            videoFile: videoUpload.url,
+            videoFile: videoUrl,
             thumbnail: finalThumbnailUrl,
             duration: videoUpload.duration,
-            isPublished: true 
-            // title and description are left untouched because they are already correct!
+            isPublished: true
         });
 
+        console.log("DEBUG: Database update successful for video:", videoId);
+
     } catch (error) {
-        console.error("Background processing failed for video:", videoId, error);
-        await Video.findByIdAndDelete(videoId);
+        console.error("!!! BACKGROUND PROCESS FAILED !!!", error);
+        // We do NOT delete the DB record here anymore, so we can see if it worked or not.
+        // await Video.findByIdAndDelete(videoId); 
+    } finally {
+        // Safe Cleanup
+        if (videoLocalPath && fs.existsSync(videoLocalPath)) fs.unlinkSync(videoLocalPath);
+        if (thumbnailLocalPath && fs.existsSync(thumbnailLocalPath)) fs.unlinkSync(thumbnailLocalPath);
     }
 }
 
