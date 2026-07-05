@@ -31,7 +31,7 @@ export const useChangeUserDetails = () => {
         try {
             if (fullName.trim() !== "") {
                 await axios.patch(
-                    "${import.meta.env.VITE_API_BASE_URL}/api/v1/users/change-details",
+                    `${import.meta.env.VITE_API_BASE_URL}/api/v1/users/change-details`,
                     { fullName },
                     { headers: { "Content-Type": "application/json" }, withCredentials: true }
                 );
