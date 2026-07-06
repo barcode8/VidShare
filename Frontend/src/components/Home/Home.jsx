@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from '../Sidebar/Sidebar.jsx';
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import VideoCard from '../VideoCard/VideoCard.jsx';
+import { useGetVideos } from '../../hooks/Video/useGetVideos.js';
 
-// Animation variants for the staggering effect
 const containerVariants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1, // Delays each child animation by 0.1s
-            delayChildren: 0.2    // Small delay before the first animation starts
+            staggerChildren: 0.1, 
+            delayChildren: 0.2    
         }
     }
 };
@@ -27,24 +26,7 @@ const itemVariants = {
 };
 
 export default function Home() {
-    const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchVideos = async () => {
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/videos`);
-                if (response.data?.success) {
-                    setVideos(response.data.data.docs || []);
-                }
-            } catch (error) {
-                console.error("Error fetching videos:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchVideos();
-    }, []);
+    const { videos, loading, hasMore, loadMore } = useGetVideos(10);
 
     return (
         <div className="flex bg-black min-h-screen pt-20 font-roboto">
@@ -62,25 +44,48 @@ export default function Home() {
                         animate="show"
                         className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12"
                     >
-                        {loading ? (
-                            Array(6).fill(0).map((_, i) => <VideoSkeleton key={i} />)
-                        ) : videos.length > 0 ? (
+                        {videos.length > 0 ? (
                             videos.map((video) => (
                                 <motion.div key={video._id} variants={itemVariants}>
                                     <VideoCard video={video} />
                                 </motion.div>
                             ))
                         ) : (
-                            <motion.div 
-                                initial={{ opacity: 0 }} 
-                                animate={{ opacity: 1 }} 
-                                className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-500"
-                            >
-                                <p className="text-xl font-medium">No videos found</p>
-                                <p className="text-sm">Be the first one to upload a video!</p>
-                            </motion.div>
+                            !loading && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }} 
+                                    animate={{ opacity: 1 }} 
+                                    className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-500"
+                                >
+                                    <p className="text-xl font-medium">No videos found</p>
+                                    <p className="text-sm">Be the first one to upload a video!</p>
+                                </motion.div>
+                            )
+                        )}
+
+                        {loading && (
+                            Array(6).fill(0).map((_, i) => (
+                                <VideoSkeleton key={`skeleton-${i}`} />
+                            ))
                         )}
                     </motion.div>
+
+                    {hasMore && !loading && videos.length > 0 && (
+                        <div className="flex justify-center mt-12 mb-6">
+                            <button 
+                                onClick={loadMore}
+                                className="bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 px-6 rounded-full transition-colors"
+                            >
+                                Load More
+                            </button>
+                        </div>
+                    )}
+
+                    {!hasMore && videos.length > 0 && (
+                        <div className="flex justify-center mt-12 mb-6 text-zinc-500 text-sm">
+                            <p>You've reached the end!</p>
+                        </div>
+                    )}
                 </div>
             </motion.main>
         </div>
