@@ -10,7 +10,7 @@ Upload videos, build channels, subscribe to creators, create playlists, track wa
 
 ![Hero](./docs/images/hero.png)
 
-[Live Demo](#) • [API Docs](#) • [Report Bug](#)
+[Live Demo](#) • [API Docs](https://mintlify.wiki/barcode8/VideoHub/api/overview) • [Report Bug](#)
 
 </div>
 
@@ -35,7 +35,7 @@ Rather than simply storing videos, VideoHub demonstrates how authentication, clo
 ### Home Feed
 
 <!-- TODO -->
-<img src="./docs/images/home.png"/>
+<img src="Readme-files/hero.png"/>
 
 </td>
 
@@ -44,7 +44,7 @@ Rather than simply storing videos, VideoHub demonstrates how authentication, clo
 ### Video Player
 
 <!-- TODO -->
-<img src="./docs/images/player.png"/>
+<img src="Readme-files/player.png"/>
 
 </td>
 </tr>
@@ -55,7 +55,7 @@ Rather than simply storing videos, VideoHub demonstrates how authentication, clo
 ### Channel Dashboard
 
 <!-- TODO -->
-<img src="./docs/images/dashboard.png"/>
+<img src="Readme-files/dashboard.png"/>
 
 </td>
 
@@ -64,7 +64,7 @@ Rather than simply storing videos, VideoHub demonstrates how authentication, clo
 ### Upload Flow
 
 <!-- TODO -->
-<img src="./docs/images/upload.gif"/>
+<img src="Readme-files/upload.png"/>
 
 </td>
 </tr>
