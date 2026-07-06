@@ -32,10 +32,10 @@ Rather than simply storing videos, VideoHub demonstrates how authentication, clo
 <tr>
 <td>
 
-### Home Feed
+### User Profile
 
 <!-- TODO -->
-<img src="Readme-files/hero.png"/>
+<img src="Readme-files/profile.png"/>
 
 </td>
 
@@ -312,7 +312,7 @@ Some notable implementation decisions made during development:
 
 ---
 
-# 🚧 Future Improvements
+# 🚧 Potential Future Work
 
 - Adaptive bitrate streaming (HLS)
 - Video transcoding queue
@@ -352,20 +352,6 @@ Add a GIF.
 ### Dashboard
 
 Add screenshots.
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome!
-
-If you'd like to improve VideoHub, feel free to fork the repository and submit a pull request.
-
----
-
-# 📜 License
-
-MIT
 
 ---
 
