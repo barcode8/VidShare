@@ -234,11 +234,36 @@ const getVideoById = asyncHandler(async (req, res) => {
                 foreignField : "_id",
                 as : "ownerDetails",
                 pipeline : [
+                    // Look up subscriptions for this specific user/channel
+                    {
+                        $lookup: {
+                            from: "subscriptions",
+                            localField: "_id",
+                            foreignField: "channel",
+                            as: "subscribers"
+                        }
+                    },
+                    // Add the subscription math
+                    {
+                        $addFields: {
+                            subscribersCount: { $size: "$subscribers" },
+                            isSubscribed: {
+                                $cond: {
+                                    if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                                    then: true,
+                                    else: false
+                                }
+                            }
+                        }
+                    },
+                    // Project the new fields along with the old ones
                     {
                         $project:{
                             username: 1,
                             fullName: 1,
-                            avatar: 1
+                            avatar: 1,
+                            subscribersCount: 1,
+                            isSubscribed: 1
                         }
                     }
                 ]
