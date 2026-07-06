@@ -28,11 +28,14 @@ export default function WatchVideo() {
     // Create a mutable reference lock to ensure the API call only fires once per video view
     const hasLoggedView = useRef(false);
 
+    // Destructured pagination variables from the updated hook
     const { 
         comments, 
         setComments, 
         loading: commentsLoading, 
-        error: commentsError 
+        error: commentsError,
+        hasMore: hasMoreComments,
+        loadMore: loadMoreComments
     } = useGetAllComments(videoId);
 
     const {
@@ -356,18 +359,13 @@ export default function WatchVideo() {
                             </form>
                             
                             {/* Comments List Rendering */}
-                            {commentsLoading ? (
-                                <div className="flex flex-col gap-4">
-                                    {[...Array(5)].map((_, index) => (
-                                        <CommentSkeleton key={index} />
-                                    ))}
-                                </div>
-                            ) : commentsError ? (
+                            {commentsError ? (
                                 <div className="text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
                                     {commentsError}
                                 </div>
-                            ) : comments?.length > 0 ? (
+                            ) : (
                                 <div className="flex flex-col gap-4">
+                                    {/* Map existing comments */}
                                     {comments.map(comment => (
                                         <CommentCard 
                                             key={comment._id} 
@@ -377,10 +375,34 @@ export default function WatchVideo() {
                                             }}
                                         />
                                     ))}
-                                </div>
-                            ) : (
-                                <div className="text-zinc-400 text-sm italic bg-zinc-900/50 p-4 rounded-lg text-center">
-                                    No comments yet. Be the first to share your thoughts!
+                                    
+                                    {/* Skeletons while loading page 1 OR loading more */}
+                                    {commentsLoading && (
+                                        <div className="flex flex-col gap-4 mt-2">
+                                            {[...Array(5)].map((_, index) => (
+                                                <CommentSkeleton key={`comment-skel-${index}`} />
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Load More Button */}
+                                    {hasMoreComments && !commentsLoading && comments.length > 0 && (
+                                        <div className="flex justify-center mt-4">
+                                            <button 
+                                                onClick={loadMoreComments}
+                                                className="bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 px-6 rounded-full transition-colors text-sm"
+                                            >
+                                                Load More Comments
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Empty State */}
+                                    {!commentsLoading && comments.length === 0 && (
+                                        <div className="text-zinc-400 text-sm italic bg-zinc-900/50 p-4 rounded-lg text-center">
+                                            No comments yet. Be the first to share your thoughts!
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
