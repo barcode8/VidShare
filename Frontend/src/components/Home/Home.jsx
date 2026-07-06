@@ -33,7 +33,7 @@ export default function Home() {
     useEffect(() => {
         const fetchVideos = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/v1/videos');
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/videos`);
                 if (response.data?.success) {
                     setVideos(response.data.data.docs || []);
                 }
