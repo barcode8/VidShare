@@ -8,7 +8,7 @@ Upload videos, build channels, subscribe to creators, create playlists, track wa
 
 <!-- TODO: Add a hero screenshot or GIF -->
 
-![Hero](./docs/images/hero.png)
+![Hero](Readme-files/hero.png)
 
 [Live Demo](#) • [API Docs](https://mintlify.wiki/barcode8/VideoHub/api/overview) • [Report Bug](#)
 
@@ -320,7 +320,6 @@ Some notable implementation decisions made during development:
 - Notification system
 - Email verification
 - Live streaming
-- Infinite scrolling
 - Recommendation engine
 - Unit & Integration tests
 - CI/CD pipeline
