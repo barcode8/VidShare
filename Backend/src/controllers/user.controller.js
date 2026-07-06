@@ -1,6 +1,8 @@
 import {asyncHandler} from "../utils/asyncHandler.js"
 import ApiError from "../utils/ApiError.js"
 import {User} from "../models/user.models.js"
+import {Video} from "../models/video.models.js"
+import { isValidObjectId } from "mongoose"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
@@ -403,6 +405,13 @@ const getWatchHistory= asyncHandler(async (req,res)=>{
                                 }
                             ]
                         }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }    
                     }
                 ]
             }
@@ -416,4 +425,52 @@ const getWatchHistory= asyncHandler(async (req,res)=>{
     )
 })
 
-export {registerUser,loginUser,logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, changeUserDetails, changeUserAvatar, changeUserCoverImage, getUserProfile, getWatchHistory}
+const addVideoToWatchHistory = asyncHandler(async (req, res) => {
+    const { videoId } = req.params;
+
+    if(!videoId){
+        throw new ApiError(400, "Video ID not recieved")
+    }
+
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video ID");
+    }
+
+    // Pull the video from the array if it already exists (prevents duplicates)
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $pull: { watchHistory: videoId }
+        }
+    );
+
+    // Push the video to the end of the array (marks it as recently watched)
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $push: {
+                watchHistory : {
+                    $each : [videoId],
+                    $slice : -50
+                }
+            }
+        },
+        { new: true }
+    )
+
+    if (!updatedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200, 
+                updatedUser.watchHistory, 
+                "Video successfully added to watch history"
+            )
+        );
+});
+
+export {registerUser,loginUser,logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, changeUserDetails, changeUserAvatar, changeUserCoverImage, getUserProfile, getWatchHistory, addVideoToWatchHistory}

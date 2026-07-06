@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changeCurrentPassword, changeUserAvatar, changeUserCoverImage, changeUserDetails, getCurrentUser, getUserProfile, getWatchHistory, loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controller.js";
+import { changeCurrentPassword, changeUserAvatar, changeUserCoverImage, changeUserDetails, getCurrentUser, getUserProfile, getWatchHistory, loginUser, logoutUser, refreshAccessToken, registerUser, addVideoToWatchHistory } from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 
@@ -51,5 +51,8 @@ router.route("/c/:username").get(verifyJwt, getUserProfile)
 
 //Watch history route config
 router.route("/watch-history").get(verifyJwt, getWatchHistory)
+
+//Add videos to watch history
+router.route("/add/:videoId").post(verifyJwt, addVideoToWatchHistory)
 
 export default router
