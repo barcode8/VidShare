@@ -15,7 +15,8 @@ export const useWatchHistory = ()=>{
                 const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/watch-history`,{
                     withCredentials : true
                 })
-                setWatchHistory(response.data.data)
+                const historyData = response.data.data || []
+                setWatchHistory(historyData.reverse())
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to fetch watch history");
             } finally {
