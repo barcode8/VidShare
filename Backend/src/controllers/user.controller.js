@@ -394,7 +394,7 @@ const getWatchHistory= asyncHandler(async (req,res)=>{
                             from: "users",
                             localField: "owner",
                             foreignField: "_id",
-                            as: "owner",
+                            as: "ownerDetails",
                             pipeline:[
                                 {
                                     $project: {
@@ -408,8 +408,8 @@ const getWatchHistory= asyncHandler(async (req,res)=>{
                     },
                     {
                         $addFields: {
-                            owner: {
-                                $first: "$owner"
+                            ownerDetails: {
+                                $first: "$ownerDetails"
                             }
                         }    
                     }
