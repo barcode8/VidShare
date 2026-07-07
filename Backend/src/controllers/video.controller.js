@@ -2,6 +2,8 @@ import mongoose from "mongoose"
 import { isValidObjectId } from "mongoose"
 import {Video} from "../models/video.models.js"
 import {User} from "../models/user.models.js"
+import { Notification } from "../models/notification.models.js"
+import { notificationEmitter } from "../utils/eventEmitter.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -141,7 +143,7 @@ const publishVideoDraft = asyncHandler(async (req, res) => {
         owner: req.user._id 
     })
 
-    processVideoBackground(video._id, videoLocalPath, thumbnailLocalPath).catch(console.error)
+    processVideoBackground(video._id, req.user._id, title, videoLocalPath, thumbnailLocalPath).catch(console.error)
 
     //Sending this response so that the request stops processing
     return res.status(200).json(
@@ -149,7 +151,7 @@ const publishVideoDraft = asyncHandler(async (req, res) => {
     )
 })
 
-async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPath){
+async function processVideoBackground(videoId, ownerId, title, videoLocalPath, thumbnailLocalPath){
     try {
         // 1. Upload Video
         const videoUpload = await uploadOnCloudinary(videoLocalPath, true);
@@ -160,6 +162,11 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
             console.error("Cloudinary response:", videoUpload)
             await Video.findByIdAndDelete(videoId);
             return;
+
+            //Send and write a failed notification
+            const failedNotif = await Notification.create({ user: ownerId, message: `Upload failed: We couldn't process your video "${title}".` });
+            notificationEmitter.emit(`notify-${ownerId}`, failedNotif);
+            return;
         }
 
         if(videoUpload.duration > 3600){
@@ -167,10 +174,14 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
             await Video.findByIdAndDelete(videoId);
             if (thumbnailLocalPath && fs.existsSync(thumbnailLocalPath)) fs.unlinkSync(thumbnailLocalPath);
             console.error(`Video ${videoId} rejected: Exceeded 1 hour limit.`);
+
+            //Send and write an invalid notification
+            const rejectedNotif = await Notification.create({ user: ownerId, message: `Upload rejected: "${title}" exceeds the 1-hour limit.` });
+            notificationEmitter.emit(`notify-${ownerId}`, rejectedNotif);
             return;
         }
 
-        // 2. Handle the Thumbnail (Custom vs. Auto-Generated)
+        // Handle the Thumbnail (Custom vs. Auto-Generated)
         let finalThumbnailUrl = "";
 
         if (thumbnailLocalPath) {
@@ -186,7 +197,7 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
             }
         }
 
-        // 3. Update ONLY the media fields and publish status
+        // Update ONLY the media fields and publish status
         await Video.findByIdAndUpdate(videoId, {
             videoFile: videoUrl,
             thumbnail: finalThumbnailUrl,
@@ -196,10 +207,23 @@ async function processVideoBackground(videoId, videoLocalPath, thumbnailLocalPat
 
         console.log("DEBUG: Database update successful for video:", videoId);
 
+        //We emit and create a successfull notification
+        const successNotif = await Notification.create({
+            user: ownerId,
+            message: `Success! Your video "${title}" has finished processing and is now live.`,
+            videoId: videoId
+        });
+        notificationEmitter.emit(`notify-${ownerId}`, successNotif);
+
     } catch (error) {
         console.error("!!! BACKGROUND PROCESS FAILED !!!", error);
-        // We do NOT delete the DB record here anymore, so we can see if it worked or not.
-        // await Video.findByIdAndDelete(videoId); 
+        
+        //We emit and create a baseline failed notification
+        const errorNotif = await Notification.create({
+            user: ownerId,
+            message: `There was a server error processing your video "${title}". Please try again.`
+        });
+        notificationEmitter.emit(`notify-${ownerId}`, errorNotif);
     } finally {
         // Safe Cleanup
         if (videoLocalPath && fs.existsSync(videoLocalPath)) fs.unlinkSync(videoLocalPath);
