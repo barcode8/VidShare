@@ -18,6 +18,6 @@ router.route("/").get(getUnreadNotifications);
 router.route("/stream").get(streamNotifications);
 
 // Route to mark a specific notification as read
-router.route("/:id/read").patch(markNotificationAsRead);
+router.route("/:notificationId/read").patch(markNotificationAsRead);
 
 export default router;
