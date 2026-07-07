@@ -12,7 +12,7 @@ const WatchHistory = () => {
         <div className="flex min-h-screen bg-black w-full pt-20">
             <Sidebar />
 
-            <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)]">
+            <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)] custom-scrollbar">
                 
                 {/* Header Area */}
                 <div className="flex items-center gap-3 mb-8 pb-4 border-b border-zinc-800">

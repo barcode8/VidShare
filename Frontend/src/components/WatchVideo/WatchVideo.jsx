@@ -15,6 +15,7 @@ import { useCreatePlaylist } from '../../hooks/Playlist/useCreatePlaylist.js';
 import { useAddVideoToPlaylist } from '../../hooks/Playlist/useAddVideoToPlaylist.js';
 import PlaylistSaveModal from '../PlaylistModal/PlaylistSaveModal.jsx';
 import { useRecordView } from '../../hooks/Views/useRecordView.js';
+import { useAddVideoToWatchHistory } from '../../hooks/User/useAddVideoToWatchHistory.js';
 
 export default function WatchVideo() {
     const { videoId } = useParams();
@@ -27,6 +28,9 @@ export default function WatchVideo() {
     const { recordView } = useRecordView();
     // Create a mutable reference lock to ensure the API call only fires once per video view
     const hasLoggedView = useRef(false);
+
+    // Initialize the Watch History hook
+    const { addToHistory } = useAddVideoToWatchHistory();
 
     // Destructured pagination variables from the updated hook
     const { 
@@ -80,15 +84,28 @@ export default function WatchVideo() {
         hasLoggedView.current = false;
     }, [videoId]);
 
+    // Silently add the video to Watch History when the URL (videoId) changes
+    useEffect(() => {
+        if (videoId) {
+            addToHistory(videoId);
+        }
+    }, [videoId, addToHistory]);
+
     // Handlers
     const handleTimeUpdate = (e) => {
         // If the view has already been recorded for this video, do nothing
         if (hasLoggedView.current) return;
 
         const currentTime = e.target.currentTime;
-        const VIEW_THRESHOLD = 10; // Trigger view count after 10 seconds of watch time
-        
+        const duration = e.target.duration;
 
+        // Ensure duration metadata has loaded before calculating logic
+        if (!duration) return;
+
+        // If video is under 10s, threshold is 95% of duration (avoids browser event timing bugs).
+        // Otherwise, threshold is standard 10 seconds.
+        const VIEW_THRESHOLD = duration < 10 ? duration * 0.95 : 10;
+        
         if (currentTime >= VIEW_THRESHOLD && video?._id) {
             // Lock it so it doesn't fire continuously
             hasLoggedView.current = true;
@@ -240,7 +257,7 @@ export default function WatchVideo() {
                                 poster={video.thumbnail} 
                                 controls 
                                 autoPlay 
-                                onTimeUpdate={handleTimeUpdate} // <-- Added listener here
+                                onTimeUpdate={handleTimeUpdate} 
                                 className="w-full h-full object-contain"
                             >
                                 Your browser does not support the video tag.
