@@ -92,7 +92,7 @@ export default function MyChannel() {
         const fetchMyVideos = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:5000/api/v1/videos?userId=${user?._id}`,
+                    `${import.meta.env.VITE_API_BASE_URL}/api/v1/videos?userId=${user?._id}`,
                     { withCredentials: true }
                 );
                 if (response.data?.success) {

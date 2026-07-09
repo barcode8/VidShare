@@ -25,7 +25,7 @@ export const AuthProvider = ({children}) =>{
         //This method calls the current user API from the backend to obtain current user info
         const checkAuth = async ()=>{
             try{
-                const res = await axios.get("http://localhost:5000/api/v1/users/current-user", {
+                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/current-user`, {
                     withCredentials: true //Not using will cause the request to exclude the cookie, which the backend will then reject because of CORS
                 });
                 setUser(res.data.data) //User data is added to the user variable
@@ -44,7 +44,7 @@ export const AuthProvider = ({children}) =>{
 
     //This functions lets us logout of our current user by directly calling the logout API and setting the user data to NULL
     const logout = async () => {
-        await axios.post("http://localhost:5000/api/v1/users/logout", {}, { withCredentials: true });
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/logout`, {}, { withCredentials: true });
         setUser(null);
     };
 
