@@ -41,7 +41,7 @@ export const useChangeUserDetails = () => {
                 const formData = new FormData();
                 formData.append("avatar", avatar);
                 await axios.patch(
-                    "${import.meta.env.VITE_API_BASE_URL}/api/v1/users/change-avatar",
+                    `${import.meta.env.VITE_API_BASE_URL}/api/v1/users/change-avatar`,
                     formData,
                     { headers: { "Content-Type": "multipart/form-data" }, withCredentials: true }
                 );
