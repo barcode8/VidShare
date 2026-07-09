@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom"; 
-import { LuSearch, LuUpload, LuX, LuMenu, LuLogOut, LuUser, LuBell, LuMonitorPlay, LuCheck } from "react-icons/lu";
+import { LuSearch, LuUpload, LuX, LuMenu, LuLogOut, LuUser, LuBell, LuMonitorPlay, LuCheck, LuArrowLeft } from "react-icons/lu";
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useGetUnreadNotifications } from '../../hooks/Notifications/useGetUnreadNotifications.js';
 import { useMarkNotificationAsRead } from '../../hooks/Notifications/useMarkNotificationAsRead.js';
@@ -12,10 +12,14 @@ export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
     
+    // State for Mobile Search UX
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+    const searchInputRef = useRef(null);
+    
     // State for the notification dropdown
     const [notifOpen, setNotifOpen] = useState(false);
 
-    // 1. Create references for the dropdown containers
+    // Create references for the dropdown containers
     const notifRef = useRef(null);
     const profileRef = useRef(null);
 
@@ -27,7 +31,14 @@ export default function Header() {
     
     const navigate = useNavigate(); 
 
-    // 2. Add the global click listener to close dropdowns when clicking outside
+    // Auto-focus the mobile search input when it opens
+    useEffect(() => {
+        if (mobileSearchOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [mobileSearchOpen]);
+
+    // Add the global click listener to close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             // Close notification dropdown if clicked outside
@@ -53,6 +64,7 @@ export default function Header() {
         e.preventDefault(); 
         if (query.trim()) {
             navigate(`/search?query=${encodeURIComponent(query)}`);
+            setMobileSearchOpen(false); // Close mobile search on submit
         }
     };
 
@@ -64,7 +76,7 @@ export default function Header() {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-zinc-800 font-roboto h-16">
-            <div className="px-4 sm:px-6 lg:px-8 h-full">
+            <div className="px-4 sm:px-6 lg:px-8 h-full relative">
                 <div className="flex items-center justify-between h-full">
 
                     {/* 1. Left Section */}
@@ -88,7 +100,7 @@ export default function Header() {
                         </div>
                     </div>
 
-                    {/* 2. Search Section */}
+                    {/* 2. Desktop Search Section */}
                     <div className="hidden lg:flex justify-center w-full max-w-2xl px-4">
                         <form onSubmit={handleSearchSubmit} className="relative w-full">
                             <input
@@ -117,7 +129,11 @@ export default function Header() {
 
                     {/* 3. Action Section */}
                     <div className="flex flex-1 items-center justify-end gap-3 min-w-[200px]">
-                        <button className="lg:hidden p-2 hover:bg-zinc-800 rounded-full text-white">
+                        {/* Mobile Search Trigger Button */}
+                        <button 
+                            onClick={() => setMobileSearchOpen(true)}
+                            className="lg:hidden p-2 hover:bg-zinc-800 rounded-full text-white"
+                        >
                             <LuSearch size={20} />
                         </button>
 
@@ -136,17 +152,15 @@ export default function Header() {
                             <div className="flex items-center gap-1 sm:gap-3">
                                 
                                 {/* 🔔 NOTIFICATION DROPDOWN */}
-                                {/* 3. Attached the notifRef here */}
                                 <div className="relative" ref={notifRef}>
                                     <button 
                                         onClick={() => {
                                             setNotifOpen(!notifOpen);
-                                            if (profileOpen) setProfileOpen(false); // Close profile if open
+                                            if (profileOpen) setProfileOpen(false);
                                         }}
                                         className="hidden sm:block p-2 hover:bg-zinc-800 rounded-full text-white relative"
                                     >
                                         <LuBell size={20} />
-                                        {/* Dynamic Red Dot */}
                                         {notifications?.length > 0 && (
                                             <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-pink-500 rounded-full border-2 border-black"></span>
                                         )}
@@ -175,7 +189,6 @@ export default function Header() {
                                                     ) : (
                                                         notifications?.map(notif => (
                                                             <div key={notif._id} className="p-4 border-b border-zinc-800/50 hover:bg-zinc-800/50 transition-colors flex flex-col gap-2">
-                                                                {/* Shows Video Thumbnail if your backend aggregation successfully fetched it */}
                                                                 {notif.videoDetails?.thumbnail && (
                                                                     <img 
                                                                         src={notif.videoDetails.thumbnail} 
@@ -185,7 +198,6 @@ export default function Header() {
                                                                 )}
                                                                 <p className="text-sm text-zinc-300 leading-snug">{notif.message}</p>
                                                                 <div className="flex justify-end mt-1">
-                                                                    {/* Triggers Optimistic Hook */}
                                                                     <button 
                                                                         onClick={() => markAsRead(notif._id, setNotifications)}
                                                                         className="text-xs text-pink-500 hover:text-pink-400 font-medium transition-colors flex items-center gap-1"
@@ -211,12 +223,11 @@ export default function Header() {
                                 </div>
 
                                 {/* 🧑 PROFILE DROPDOWN */}
-                                {/* 4. Attached the profileRef here */}
                                 <div className="relative" ref={profileRef}>
                                     <motion.button
                                         onClick={() => {
                                             setProfileOpen(!profileOpen);
-                                            if (notifOpen) setNotifOpen(false); // Close notif if open
+                                            if (notifOpen) setNotifOpen(false); 
                                         }}
                                         className="flex items-center"
                                         whileHover={{ scale: 1.05 }}
@@ -264,6 +275,52 @@ export default function Header() {
                         </button>
                     </div>
                 </div>
+
+                {/* 📱 MOBILE SEARCH OVERLAY */}
+                <AnimatePresence>
+                    {mobileSearchOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-0 left-0 w-full h-full bg-black z-50 flex items-center px-4 gap-2 lg:hidden"
+                        >
+                            <button
+                                onClick={() => {
+                                    setMobileSearchOpen(false);
+                                    setQuery(""); // Clear on exit
+                                }}
+                                className="p-2 text-white rounded-full hover:bg-zinc-800 transition-colors"
+                            >
+                                <LuArrowLeft size={24} />
+                            </button>
+                            
+                            <form onSubmit={handleSearchSubmit} className="flex-1 relative flex items-center">
+                                <input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    placeholder="Search videos..."
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    className="w-full bg-zinc-900 text-white px-4 py-2 pr-10 rounded-full border border-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.4)] outline-none"
+                                />
+                                {query && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setQuery("");
+                                            searchInputRef.current?.focus();
+                                        }}
+                                        className="absolute right-3 p-1 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors"
+                                    >
+                                        <LuX size={18} />
+                                    </button>
+                                )}
+                            </form>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
             </div>
         </nav>
     );
