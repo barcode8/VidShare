@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎥 VideoHub
+# 🎥 VidShare
 
 ### A modern full-stack video streaming platform built with the MERN stack.
 
@@ -18,7 +18,7 @@ Upload videos, build channels, subscribe to creators, create playlists, track wa
 
 # 📖 About
 
-VideoHub is a YouTube-inspired video streaming platform built to explore what goes into a real-world media application beyond basic CRUD operations.
+VidShare is a YouTube-inspired video streaming platform built to explore what goes into a real-world media application beyond basic CRUD operations.
 
 The project focuses on designing a scalable backend architecture while implementing features commonly found in production streaming platforms, including secure authentication, media uploads, playlists, subscriptions, analytics, and watch history.
 
@@ -118,7 +118,7 @@ Rather than simply storing videos, VideoHub demonstrates how authentication, clo
 
 # 🏗️ Technical Highlights
 
-Unlike a basic CRUD application, VideoHub includes several production-inspired backend concepts.
+Unlike a basic CRUD application, VidShare includes several production-inspired backend concepts.
 
 - Modular Express architecture
 - JWT authentication with refresh token rotation
