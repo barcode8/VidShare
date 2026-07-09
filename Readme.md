@@ -10,7 +10,7 @@ Upload videos, build channels, subscribe to creators, create playlists, track wa
 
 ![Hero](Readme-files/hero.png)
 
-[Live Demo](#) • [API Docs](https://mintlify.wiki/barcode8/VideoHub/api/overview)
+[🌐 Live Demo](https://vidshare.haardik.co.in) • [📚 API Docs](https://mintlify.wiki/barcode8/VideoHub/api/overview)
 
 </div>
 
