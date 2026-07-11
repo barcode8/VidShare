@@ -1,0 +1,16 @@
+services:
+  backend:
+    image: vidshare-backend
+    container_name: vidshare-backend
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - "8000:5000"
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
