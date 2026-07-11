@@ -39,4 +39,4 @@ connectDB()
     console.log("DB connection failed!! ",error)
 })
 
-console.log("CI/CD pipeline test")
+console.log("CI/CD WORKS")
