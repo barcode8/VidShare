@@ -244,7 +244,7 @@ export default function UploadVideo() {
                                                 <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Video Link</span>
                                                 <div className="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-700">
                                                     <a href="#" className="text-sm text-purple-400 hover:text-purple-300 truncate font-medium">
-                                                        {videoFile ? `videohub.com/watch?v=${draftId}` : "Upload to generate link..."}
+                                                        {videoFile ? `vidshare.haardik.co.in/watch/${draftId}` : "Upload to generate link..."}
                                                     </a>
                                                 </div>
                                             </div>
