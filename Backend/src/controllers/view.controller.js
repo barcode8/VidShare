@@ -18,7 +18,7 @@ const recordView = asyncHandler(async (req, res) =>{
     }
 
     //Extracting user id if user is logged in
-    const userId = req.user._id || null
+    const userId = req.user?._id || null
 
     // Extract IP. Checking 'x-forwarded-for' is crucial if we ever deploy to platforms like Render, Vercel, or Heroku.
     const ipAddress = req.headers['x-forwarded-for'] || req.ip
