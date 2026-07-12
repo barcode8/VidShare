@@ -38,5 +38,3 @@ connectDB()
 .catch((error)=>{
     console.log("DB connection failed!! ",error)
 })
-
-console.log("CI/CD WORKS")

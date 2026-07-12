@@ -32,7 +32,15 @@ export const useUploadVideo = ()=>{
 
     //Initialize video to get draft id from backend
     const initVideo = async (file)=>{
-        setVideoFile(file);
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
+        if (file.size > MAX_FILE_SIZE) {
+            setError("File size exceeds the 100MB limit. Please select a smaller video.");
+            return; // Abort the upload process
+        }
+
+        // Clear any previous errors if the new file is valid
+        setError(null);
+        setVideoFile(file)
 
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/videos/init`,

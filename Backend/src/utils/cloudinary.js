@@ -22,7 +22,7 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
         };
 
         if (isVideo) {
-            options.transformation = [{ width: 1920, height: 1080, crop: "limit" }];
+            options.eager = [{ width: 1920, height: 1080, crop: "limit" }];
             options.eager_async = true;
         }
 

@@ -156,9 +156,7 @@ async function processVideoBackground(videoId, ownerId, title, videoLocalPath, t
         // 1. Upload Video
         const videoUpload = await uploadOnCloudinary(videoLocalPath, true);
 
-        const videoUrl = videoUpload?.secure_url || videoUpload?.url;
-
-        if (!videoUpload || !videoUrl) {
+        if (!videoUpload) {
             console.error("Cloudinary response:", videoUpload)
             await Video.findByIdAndDelete(videoId);
             return;
@@ -180,6 +178,8 @@ async function processVideoBackground(videoId, ownerId, title, videoLocalPath, t
             notificationEmitter.emit(`notify-${ownerId}`, rejectedNotif);
             return;
         }
+
+        const videoUrl = videoUpload.eager?.[0]?.secure_url || videoUpload.secure_url || videoUpload.url;
 
         // Handle the Thumbnail (Custom vs. Auto-Generated)
         let finalThumbnailUrl = "";
