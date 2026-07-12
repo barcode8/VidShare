@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import SearchVideoCard from '../VideoCard/SearchVideoCard.jsx'; 
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 import { useSearchResults } from '../../hooks/Video/useSearchResults.js';
 
 const SearchResult = () => {
@@ -28,7 +29,7 @@ const SearchResult = () => {
     };
 
     return (
-        <div className="flex w-full min-h-screen bg-black overflow-hidden">
+        <div className="flex w-full min-h-screen bg-black overflow-hidden pb-16 md:pb-0">
             <Sidebar />
 
             <main className="flex-1 bg-[#0f0f0f] text-white p-4 md:p-8 relative overflow-y-auto h-[calc(100vh-64px)] mt-16">
@@ -103,6 +104,7 @@ const SearchResult = () => {
 
                 </div>
             </main>
+            <BottomNav />
         </div>
     );
 };

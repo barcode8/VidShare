@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { LuListVideo, LuPlus, LuX } from 'react-icons/lu';
 import Sidebar from '../Sidebar/Sidebar.jsx';
-import { useNavigate } from 'react-router-dom'; // Changed from Link to useNavigate
+import BottomNav from '../BottomNav/BottomNav.jsx';
+import { useNavigate } from 'react-router-dom'; 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useGetUserPlaylists } from '../../hooks/Playlist/useGetUserPlaylists.js';
 import { useCreatePlaylist } from '../../hooks/Playlist/useCreatePlaylist.js';
 import { useDeletePlaylist } from '../../hooks/Playlist/useDeletePlaylist.js';
 
 const Playlist = () => {
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate(); 
     const { user } = useAuth();
     const { getUserPlaylists, loading: playlistLoading, error: playlistError, userPlaylists } = useGetUserPlaylists();
     const { formData, handleChange, handleSubmit, loading: creatingPlaylist, error: createError, success: createSuccess } = useCreatePlaylist();
@@ -59,7 +60,7 @@ const Playlist = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-black w-full pt-20">
+        <div className="flex min-h-screen bg-black w-full pt-20 pb-16 md:pb-0">
             <Sidebar />
 
             <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)]">
@@ -113,12 +114,11 @@ const Playlist = () => {
                         {userPlaylists?.map((playlist) => (
                             <div
                                 key={playlist._id}
-                                onClick={() => navigate(`/playlists/${playlist._id}`)} // Added navigation here
-                                className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-pink-500/40 cursor-pointer" // Added cursor-pointer
+                                onClick={() => navigate(`/playlists/${playlist._id}`)}
+                                className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-pink-500/40 cursor-pointer"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
                                 <div className="flex items-start justify-between gap-3">
-                                    {/* Replaced Link with a standard div wrapper */}
                                     <div className="relative block flex-1">
                                         <div>
                                             <h2 className="text-lg font-semibold text-white">{playlist.name}</h2>
@@ -135,7 +135,7 @@ const Playlist = () => {
                                         <button
                                             type="button"
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Prevents click from triggering the card's navigation
+                                                e.stopPropagation(); 
                                                 handleDeleteClicked(playlist);
                                             }}
                                             disabled={deletingPlaylist && deletingId === playlist._id}
@@ -159,6 +159,8 @@ const Playlist = () => {
                     </div>
                 )}
             </div>
+
+            <BottomNav />
 
             {/* Create Playlist Modal */}
             {isCreateModalOpen && (

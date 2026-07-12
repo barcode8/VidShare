@@ -4,12 +4,13 @@ import VideoCard from '../VideoCard/VideoCard.jsx';
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import { LuHistory } from 'react-icons/lu';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 
 const WatchHistory = () => {
     const { loading, error, watchHistory } = useWatchHistory();
 
     return (
-        <div className="flex min-h-screen bg-black w-full pt-20">
+        <div className="flex min-h-screen bg-black w-full pt-20 pb-16 md:pb-0">
             <Sidebar />
 
             <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)] custom-scrollbar">
@@ -52,6 +53,8 @@ const WatchHistory = () => {
                     </div>
                 )}
             </div>
+            
+            <BottomNav />
         </div>
     );
 };

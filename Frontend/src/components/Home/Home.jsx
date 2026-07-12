@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import VideoCard from '../VideoCard/VideoCard.jsx';
 import { useGetVideos } from '../../hooks/Video/useGetVideos.js';
@@ -29,7 +30,8 @@ export default function Home() {
     const { videos, loading, hasMore, loadMore } = useGetVideos(10);
 
     return (
-        <div className="flex bg-black min-h-screen pt-20 font-roboto">
+        // Added pb-16 md:pb-0 to ensure the bottom nav doesn't cover content
+        <div className="flex bg-black min-h-screen pt-20 pb-16 md:pb-0 font-roboto">
             <Sidebar />
 
             <motion.main 
@@ -37,7 +39,7 @@ export default function Home() {
                 initial="hidden"
                 animate="visible"
             >
-                <div className="p-6 md:p-10"> 
+                <div className="p-4 sm:p-6 md:p-10"> 
                     <motion.div 
                         variants={containerVariants}
                         initial="hidden"
@@ -88,6 +90,9 @@ export default function Home() {
                     )}
                 </div>
             </motion.main>
+            
+            {/* Render the mobile bottom navigation */}
+            <BottomNav />
         </div>
     );
 }

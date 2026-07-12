@@ -4,13 +4,14 @@ import { useGetLikedVideos } from '../../hooks/Likes/useGetLikedVideos.js';
 import VideoCard from '../VideoCard/VideoCard.jsx'
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 import { LuThumbsUp } from 'react-icons/lu';
 
 const LikedVideos = () => {
     const { likedVideos, loading, error } = useGetLikedVideos();
 
     return (
-        <div className="flex min-h-screen bg-black w-full pt-20">
+        <div className="flex min-h-screen bg-black w-full pt-20 pb-16 md:pb-0">
             <Sidebar />
 
             <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)]">
@@ -59,6 +60,8 @@ const LikedVideos = () => {
                     </div>
                 )}
             </div>
+            
+            <BottomNav />
         </div>
     );
 };

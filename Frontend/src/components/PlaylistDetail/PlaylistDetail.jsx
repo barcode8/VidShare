@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { LuListVideo, LuTrash } from 'react-icons/lu';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 import VideoCard from '../VideoCard/VideoCard.jsx';
 import { useGetPlaylistById } from '../../hooks/Playlist/useGetPlaylistById.js';
 import { useRemoveVideoFromPlaylist } from '../../hooks/Playlist/useRemoveVideoFromPlaylist.js';
@@ -33,13 +34,12 @@ const PlaylistDetail = () => {
     };
 
     // Create a boolean check to verify if the current user owns the playlist
-    // We check both playlist.owner and playlist.owner._id in case the backend populates the owner field
     const isOwner = user?._id && playlist?.owner && (
         user._id === playlist.owner || user._id === playlist.owner._id
     );
 
     return (
-        <div className="flex min-h-screen bg-black w-full pt-20 relative">
+        <div className="flex min-h-screen bg-black w-full pt-20 relative pb-16 md:pb-0">
             <Sidebar />
 
             <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)]">
@@ -102,7 +102,6 @@ const PlaylistDetail = () => {
                             <div key={video._id} className="flex flex-col gap-3 bg-zinc-900/40 p-3 rounded-2xl border border-zinc-800 transition-all hover:bg-zinc-900/80">
                                 <VideoCard video={video} />
                                 
-                                {/* 4. Conditionally render the button based on the isOwner check */}
                                 {isOwner && (
                                     <button
                                         onClick={() => setVideoToRemove(video._id)}
@@ -117,6 +116,8 @@ const PlaylistDetail = () => {
                     </div>
                 )}
             </div>
+
+            <BottomNav />
 
             {/* Custom Confirmation Modal */}
             {videoToRemove && (

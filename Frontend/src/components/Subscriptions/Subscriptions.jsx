@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LuSquarePlay, LuUserPlus } from 'react-icons/lu';
 import { useGetSubscribedChannels } from '../../hooks/Subscription/useGetSubscribedChannels.js';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 
 export default function Subscriptions() {
     const { subscribedChannels, loading, error } = useGetSubscribedChannels();

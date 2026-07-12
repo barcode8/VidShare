@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Link } from 'react-router-dom';
@@ -7,9 +7,9 @@ import { LuPencil, LuTrash2, LuEyeOff, LuEye, LuX } from 'react-icons/lu';
 import { VideoSkeleton } from '../Skeleton/VideoSkeleton.jsx';
 import { formatDuration } from '../../utils/formatTime.js';
 import Sidebar from '../Sidebar/Sidebar.jsx';
+import BottomNav from '../BottomNav/BottomNav.jsx';
 import { useTogglePublish } from '../../hooks/Video/useTogglePublish.js';
 import { useDeleteVideo } from '../../hooks/Video/useDeleteVideo.js';
-import { useDashboard } from '../../hooks/Dashboard/useDashboard.js';
 
 // Framer Motion Variants
 const containerVariants = {
@@ -145,7 +145,7 @@ export default function MyChannel() {
     if (!user) return null;
 
     return (
-        <div className="flex bg-black min-h-screen pt-20 font-roboto">
+        <div className="flex bg-black min-h-screen pt-20 font-roboto pb-16 md:pb-0">
             <Sidebar />
 
             <motion.main 
@@ -216,7 +216,7 @@ export default function MyChannel() {
                             </Link>
                         </motion.div>
 
-                        <motion.div variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12">
+                        <motion.div variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8 sm:gap-y-12">
                             {loading ? (
                                 Array(4).fill(0).map((_, i) => <VideoSkeleton key={i} />)
                             ) : videos.length > 0 ? (
@@ -233,7 +233,8 @@ export default function MyChannel() {
                                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                             />
 
-                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 z-10">
+                                            {/* Desktop Hover Overlay (Hidden on Mobile) */}
+                                            <div className="hidden sm:flex absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center gap-4 z-10">
                                                 <Link to={`/edit-video/${video._id}`} state={{ video }}>
                                                     <button className="p-3 bg-purple-600 hover:bg-purple-500 rounded-full text-white transition-transform hover:scale-110">
                                                         <LuPencil size={20} />
@@ -271,6 +272,34 @@ export default function MyChannel() {
                                                 <span>{video.views || 0} views</span>
                                                 <span>{new Date(video.createdAt).toLocaleDateString()}</span>
                                             </div>
+
+                                            {/* Mobile Action Bar (Hidden on Desktop) */}
+                                            <div className="flex sm:hidden items-center justify-between mt-4 pt-3 border-t border-[#18181b]">
+                                                <Link 
+                                                    to={`/edit-video/${video._id}`} 
+                                                    state={{ video }} 
+                                                    className="flex flex-col items-center gap-1.5 text-purple-500 hover:text-purple-400 p-2 flex-1 transition-colors"
+                                                >
+                                                    <LuPencil size={18} />
+                                                    <span className="text-[10px] uppercase tracking-wider font-bold">Edit</span>
+                                                </Link>
+                                                <button 
+                                                    onClick={() => openVisibilityModal(video)}
+                                                    className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-white p-2 flex-1 transition-colors border-x border-[#18181b]"
+                                                >
+                                                    {video.isPublished ? <LuEye size={18} /> : <LuEyeOff size={18} />}
+                                                    <span className="text-[10px] uppercase tracking-wider font-bold">
+                                                        {video.isPublished ? 'Public' : 'Hidden'}
+                                                    </span>
+                                                </button>
+                                                <button 
+                                                    onClick={() => openDeleteModal(video._id)}
+                                                    className="flex flex-col items-center gap-1.5 text-red-500 hover:text-red-400 p-2 flex-1 transition-colors"
+                                                >
+                                                    <LuTrash2 size={18} />
+                                                    <span className="text-[10px] uppercase tracking-wider font-bold">Delete</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 ))
@@ -289,6 +318,8 @@ export default function MyChannel() {
                     </div>
                 </div>
             </motion.main>
+
+            <BottomNav />
 
             {/* Modals */}
             <ConfirmationModal

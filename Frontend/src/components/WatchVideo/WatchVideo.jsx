@@ -266,23 +266,28 @@ export default function WatchVideo() {
 
                         <h1 className="text-xl md:text-2xl font-bold text-white mt-4 line-clamp-2">{video.title}</h1>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
-                            <div className="flex items-center gap-4">
-                                <Link to={`/channel/${channelUsername}`}>
-                                    <img src={avatarUrl} alt={channelUsername} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover bg-zinc-800" />
-                                </Link>
-                                <div>
-                                    <Link to={`/channel/${channelUsername}`}>
-                                        <h3 className="text-white font-bold text-sm md:text-base hover:text-pink-500 transition-colors">{channelName}</h3>
+                        {/* --- UPDATED INFO AND ACTIONS SECTION --- */}
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between mt-4 gap-4 lg:gap-6">
+                            
+                            {/* Channel Info & Subscribe Button */}
+                            <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-6 w-full lg:w-auto">
+                                <div className="flex items-center gap-3">
+                                    <Link to={`/channel/${channelUsername}`} className="shrink-0">
+                                        <img src={avatarUrl} alt={channelUsername} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover bg-zinc-800" />
                                     </Link>
-                                    <p className="text-zinc-400 text-xs md:text-sm">{localSubCount} subscribers</p>
+                                    <div className="flex flex-col">
+                                        <Link to={`/channel/${channelUsername}`}>
+                                            <h3 className="text-white font-bold text-sm md:text-base hover:text-pink-500 transition-colors line-clamp-1">{channelName}</h3>
+                                        </Link>
+                                        <p className="text-zinc-400 text-xs md:text-sm">{localSubCount} subscribers</p>
+                                    </div>
                                 </div>
                                 
-                                <div className="flex flex-col">
+                                <div className="flex flex-col relative shrink-0">
                                     <button 
                                         onClick={handleSubscribeToggle}
                                         disabled={isSubscribing}
-                                        className={`ml-2 w-32 py-2 rounded-full transition-all font-bold text-sm disabled:opacity-70 disabled:cursor-not-allowed group ${
+                                        className={`px-4 md:px-5 py-2 rounded-full transition-all font-bold text-sm disabled:opacity-70 disabled:cursor-not-allowed group ${
                                             localIsSubscribed 
                                                 ? "bg-zinc-800 text-white border border-zinc-700 hover:bg-red-600/90 hover:border-red-600 hover:text-white shadow-none" 
                                                 : "bg-white hover:bg-zinc-200 text-black shadow-md"
@@ -299,13 +304,14 @@ export default function WatchVideo() {
                                             "Subscribe"
                                         )}
                                     </button>
-                                    {subscriptionError && <span className="text-red-500 text-xs mt-1 ml-4">{subscriptionError}</span>}
+                                    {subscriptionError && <span className="text-red-500 text-xs mt-1 absolute -bottom-5 w-max">{subscriptionError}</span>}
                                 </div>
                             </div>
 
-                            <div className="flex flex-col items-end gap-1">
-                                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-                                    <div className="flex bg-zinc-900 rounded-full items-center text-sm font-medium">
+                            {/* Action Buttons */}
+                            <div className="flex flex-col w-full lg:w-auto">
+                                <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 hide-scrollbar w-full">
+                                    <div className="flex bg-zinc-900 rounded-full items-center text-sm font-medium shrink-0">
                                         <button onClick={handleLikeToggle} disabled={isToggling} className={`flex items-center gap-2 px-4 py-2 hover:bg-zinc-800 rounded-l-full transition-colors border-r border-zinc-700 ${video.isLiked ? 'text-pink-500' : 'text-white'} ${isToggling ? 'opacity-80' : ''}`}>
                                             <LuThumbsUp size={18} fill={video.isLiked ? "currentColor" : "none"} />
                                             {video.likesCount || 0}
@@ -314,16 +320,19 @@ export default function WatchVideo() {
                                             <LuThumbsDown size={18} />
                                         </button>
                                     </div>
-                                    <button onClick={openPlaylistModal} className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap">
-                                        <LuPlus size={18} /> Save
-                                    </button>
-                                    <button className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap">
+                                    
+                                    <button className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap shrink-0">
                                         <LuShare2 size={18} /> Share
                                     </button>
+                                    
+                                    <button onClick={openPlaylistModal} className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap shrink-0">
+                                        <LuPlus size={18} /> Save
+                                    </button>
                                 </div>
-                                {toggleError && <span className="text-xs text-red-500 font-medium px-2">{toggleError}</span>}
+                                {toggleError && <span className="text-xs text-red-500 font-medium px-2 mt-1">{toggleError}</span>}
                             </div>
                         </div>
+                        {/* --- END UPDATED INFO AND ACTIONS SECTION --- */}
 
                         <div onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)} className={`mt-6 bg-zinc-900 hover:bg-zinc-800 transition-colors rounded-xl p-4 cursor-pointer text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
                             <div className="font-bold text-white mb-2">

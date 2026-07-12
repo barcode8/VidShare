@@ -13,9 +13,9 @@ export default function Sidebar() {
         // { icon: <LuTrendingUp size={20} />, label: "Trending", path: "/trending" }, 
         { icon: <LuSquarePlay size={20} />, label: "Subscriptions", path: "/subscriptions" }, 
         { divider: true },
-        { icon: <LuHistory size={20} />, label: "History", path: "/watch-history" }, 
-        { icon: <LuThumbsUp size={20} />, label: "Liked Videos", path: "/liked-videos" },
         { icon: <LuListVideo size={20} />, label: "Playlists", path: "/playlists" },
+        { icon: <LuThumbsUp size={20} />, label: "Liked Videos", path: "/liked-videos" },
+        { icon: <LuHistory size={20} />, label: "History", path: "/watch-history" }, 
     ];
 
     return (

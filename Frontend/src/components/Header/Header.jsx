@@ -22,6 +22,7 @@ export default function Header() {
     // Create references for the dropdown containers
     const notifRef = useRef(null);
     const profileRef = useRef(null);
+    const mobileMenuRef = useRef(null);
 
     const { user, logout } = useAuth();
     
@@ -41,20 +42,18 @@ export default function Header() {
     // Add the global click listener to close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            // Close notification dropdown if clicked outside
             if (notifRef.current && !notifRef.current.contains(event.target)) {
                 setNotifOpen(false);
             }
-            // Close profile dropdown if clicked outside
             if (profileRef.current && !profileRef.current.contains(event.target)) {
                 setProfileOpen(false);
             }
+            if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+                setMobileMenuOpen(false);
+            }
         };
 
-        // Bind the event listener to the document
         document.addEventListener("mousedown", handleClickOutside);
-        
-        // Cleanup the listener when the component unmounts
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
@@ -64,30 +63,29 @@ export default function Header() {
         e.preventDefault(); 
         if (query.trim()) {
             navigate(`/search?query=${encodeURIComponent(query)}`);
-            setMobileSearchOpen(false); // Close mobile search on submit
+            setMobileSearchOpen(false); 
         }
     };
 
     const navItems = [
         { name: 'Home', path: '/' },
         { name: 'Subscriptions', path: '/subscriptions' },
-        { name: 'Library', path: '/library' }
     ];
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-zinc-800 font-roboto h-16">
             <div className="px-4 sm:px-6 lg:px-8 h-full relative">
-                <div className="flex items-center justify-between h-full">
+                <div className="flex items-center justify-between h-full gap-2">
 
                     {/* 1. Left Section */}
-                    <div className="flex flex-1 items-center min-w-[200px] pr-4 lg:pr-8">
+                    <div className="flex flex-1 items-center pr-2 lg:pr-8">
                         <Link to="/" className="shrink-0">
                             <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent cursor-pointer tracking-tight">
                                 VidShare
                             </h1>
                         </Link>
 
-                        <div className="hidden xl:flex items-center gap-6 mx-auto">
+                        <div className="hidden xl:flex items-center gap-6 mx-auto pl-8">
                             {navItems.map((item) => (
                                 <Link 
                                     key={item.name} 
@@ -128,37 +126,38 @@ export default function Header() {
                     </div>
 
                     {/* 3. Action Section */}
-                    <div className="flex flex-1 items-center justify-end gap-3 min-w-[200px]">
+                    <div className="flex flex-1 items-center justify-end gap-1 sm:gap-3">
                         {/* Mobile Search Trigger Button */}
                         <button 
                             onClick={() => setMobileSearchOpen(true)}
-                            className="lg:hidden p-2 hover:bg-zinc-800 rounded-full text-white"
+                            className="lg:hidden p-2 hover:bg-zinc-800 rounded-full text-white shrink-0"
                         >
                             <LuSearch size={20} />
                         </button>
 
-                        <Link to="/upload">
-                            <motion.button
-                                className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-full"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                <LuUpload size={16} />
-                                <span className="hidden md:inline text-sm font-medium">Upload</span>
-                            </motion.button>
-                        </Link>
-
                         {user ? (
                             <div className="flex items-center gap-1 sm:gap-3">
                                 
+                                {/* ⬆️ UPLOAD BUTTON */}
+                                <Link to="/upload" className="shrink-0 flex items-center">
+                                    <motion.button
+                                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white w-9 h-9 sm:w-auto sm:h-auto sm:px-4 sm:py-2 rounded-full"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <LuUpload size={18} className="sm:w-4 sm:h-4" />
+                                        <span className="hidden sm:inline text-sm font-medium">Upload</span>
+                                    </motion.button>
+                                </Link>
+
                                 {/* 🔔 NOTIFICATION DROPDOWN */}
-                                <div className="relative" ref={notifRef}>
+                                <div className="relative shrink-0 flex items-center" ref={notifRef}>
                                     <button 
                                         onClick={() => {
                                             setNotifOpen(!notifOpen);
                                             if (profileOpen) setProfileOpen(false);
                                         }}
-                                        className="hidden sm:block p-2 hover:bg-zinc-800 rounded-full text-white relative"
+                                        className="p-2 hover:bg-zinc-800 rounded-full text-white relative"
                                     >
                                         <LuBell size={20} />
                                         {notifications?.length > 0 && (
@@ -172,7 +171,8 @@ export default function Header() {
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, y: 10 }}
-                                                className="absolute right-0 mt-2 w-72 sm:w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col max-h-[80vh] sm:max-h-96"
+                                                // Added top-full and mt-2
+                                                className="absolute top-full -right-10 sm:right-0 mt-2 w-[90vw] max-w-[320px] sm:w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50 flex flex-col max-h-[80vh] sm:max-h-96"
                                             >
                                                 <div className="px-4 py-3 border-b border-zinc-800 sticky top-0 bg-zinc-900/95 backdrop-blur-sm z-10 flex justify-between items-center">
                                                     <p className="text-white text-sm font-bold">Notifications</p>
@@ -223,7 +223,7 @@ export default function Header() {
                                 </div>
 
                                 {/* 🧑 PROFILE DROPDOWN */}
-                                <div className="relative" ref={profileRef}>
+                                <div className="relative shrink-0 flex items-center" ref={profileRef}>
                                     <motion.button
                                         onClick={() => {
                                             setProfileOpen(!profileOpen);
@@ -240,7 +240,8 @@ export default function Header() {
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, y: 10 }}
-                                                className="absolute right-0 mt-2 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-2 overflow-hidden z-50"
+                                                // Added top-full and mt-2
+                                                className="absolute top-full right-0 mt-2 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-2 overflow-hidden z-50"
                                             >
                                                 <div className="px-4 py-3 border-b border-zinc-800">
                                                     <p className="text-white text-sm font-bold truncate">{user.fullName || user.username}</p>
@@ -262,17 +263,52 @@ export default function Header() {
                                         )}
                                     </AnimatePresence>
                                 </div>
-
                             </div>
                         ) : (
-                            <div className="hidden md:flex gap-3">
-                                <Link to='/login' className="text-zinc-400 hover:text-white px-4 py-2 text-sm">Login</Link>
-                                <Link to="/register" className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium">Register</Link>
+                            <div className="relative shrink-0 flex items-center" ref={mobileMenuRef}>
+                                {/* Desktop/Tablet Auth Buttons */}
+                                <div className="hidden md:flex gap-3">
+                                    <Link to='/login' className="text-zinc-400 hover:text-white px-4 py-2 text-sm font-medium">Login</Link>
+                                    <Link to="/register" className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">Register</Link>
+                                </div>
+                                
+                                {/* Mobile Hamburger Icon */}
+                                <button 
+                                    className="md:hidden p-2 text-white hover:bg-zinc-800 rounded-full transition-colors flex items-center justify-center" 
+                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                >
+                                    {mobileMenuOpen ? <LuX size={24} /> : <LuMenu size={24} />}
+                                </button>
+
+                                {/* Mobile Auth Dropdown Menu */}
+                                <AnimatePresence>
+                                    {mobileMenuOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            // Added top-full and mt-2
+                                            className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-2 overflow-hidden z-50 md:hidden"
+                                        >
+                                            <Link 
+                                                to="/login" 
+                                                onClick={() => setMobileMenuOpen(false)} 
+                                                className="w-full block px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors border-b border-zinc-800/50"
+                                            >
+                                                Login
+                                            </Link>
+                                            <Link 
+                                                to="/register" 
+                                                onClick={() => setMobileMenuOpen(false)} 
+                                                className="w-full block px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                                            >
+                                                Register
+                                            </Link>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         )}
-                        <button className="md:hidden p-2 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                            {mobileMenuOpen ? <LuX size={24} /> : <LuMenu size={24} />}
-                        </button>
                     </div>
                 </div>
 
@@ -288,7 +324,7 @@ export default function Header() {
                             <button
                                 onClick={() => {
                                     setMobileSearchOpen(false);
-                                    setQuery(""); // Clear on exit
+                                    setQuery(""); 
                                 }}
                                 className="p-2 text-white rounded-full hover:bg-zinc-800 transition-colors"
                             >
