@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { recordView } from "../controllers/view.controller.js";
-import { verifyJwt } from "../middlewares/auth.middleware.js";
+import { verifyJWTIfAvailable } from "../middlewares/auth.middleware.js";
 
 const router = Router()
-router.use(verifyJwt)
+router.use(verifyJWTIfAvailable)
 
 router.route("/:videoId").post(recordView)
 
