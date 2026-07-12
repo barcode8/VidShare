@@ -9,7 +9,7 @@ export default function Subscriptions() {
     const { subscribedChannels, loading, error } = useGetSubscribedChannels();
 
     return (
-        <div className="flex min-h-screen bg-black w-full pt-20 font-roboto">
+        <div className="flex min-h-screen bg-black w-full pt-20 pb-16 md:pb-0 font-roboto">
             <Sidebar />
 
             <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-64px)]">
@@ -86,6 +86,8 @@ export default function Subscriptions() {
                     </div>
                 )}
             </div>
+
+            <BottomNav />
         </div>
     );
 }
