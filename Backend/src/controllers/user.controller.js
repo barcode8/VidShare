@@ -121,7 +121,7 @@ const loginUser= asyncHandler(async (req,res)=>{
 
     const options={
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: "Lax"
     }
 
@@ -191,14 +191,14 @@ const refreshAccessToken= asyncHandler(async (req,res)=>{
             secure: true
         }
     
-        const {accessToken, newRefreshToken}=await generateAccessAndRefreshTokens(user._id)
+        const {accessToken, refreshToken}=await generateAccessAndRefreshTokens(user._id)
     
         return res
         .status(200)
         .cookie("accessToken",accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("refreshToken", refreshToken, options)
         .json(
-            new ApiResponse(200, {accessToken, newRefreshToken}, "Access token refreshed successfully ")
+            new ApiResponse(200, {accessToken, refreshToken}, "Access token refreshed successfully ")
         )
     } catch (error) {
         throw new ApiError(401,error?.message || "Invalid refresh token")
@@ -216,6 +216,7 @@ const changeCurrentPassword= asyncHandler(async (req,res)=>{
     }
 
     user.password= newPassword
+    user.refreshToken = undefined;
     await user.save({validateBeforeSave: true})
 
     return res
