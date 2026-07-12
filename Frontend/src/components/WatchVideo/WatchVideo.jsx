@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { LuThumbsUp, LuThumbsDown, LuShare2, LuPlus } from 'react-icons/lu';
 import { useWatchVideo } from '../../hooks/Video/useWatchVideo.js';
 import VideoCard from '../VideoCard/VideoCard.jsx';
@@ -58,6 +59,9 @@ export default function WatchVideo() {
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
     const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
     const [modalMessage, setModalMessage] = useState('');
+
+    // --- SHARE MODAL STATE ---
+    const [showShareModal, setShowShareModal] = useState(false);
 
     // --- LOCAL STATE OVERRIDES FOR OPTIMISTIC UI (Subscriptions) ---
     const [localIsSubscribed, setLocalIsSubscribed] = useState(false);
@@ -137,6 +141,16 @@ export default function WatchVideo() {
             setLocalIsSubscribed(result.isSubscribed);
             setLocalSubCount(prev => result.isSubscribed ? prev + 1 : prev - 1);
         }
+    };
+
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+        } catch (err) {
+            console.error('Failed to copy link:', err);
+        }
+        setShowShareModal(true);
+        setTimeout(() => setShowShareModal(false), 2000);
     };
 
     const openPlaylistModal = () => {
@@ -321,7 +335,7 @@ export default function WatchVideo() {
                                         </button>
                                     </div>
                                     
-                                    <button className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap shrink-0">
+                                    <button onClick={handleShare} className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2 rounded-full font-medium transition-colors text-sm whitespace-nowrap shrink-0">
                                         <LuShare2 size={18} /> Share
                                     </button>
                                     
@@ -463,6 +477,23 @@ export default function WatchVideo() {
                 addToPlaylistError={addToPlaylistError}
                 createPlaylistError={createPlaylistError}
             />
+
+            {/* SHARE LINK COPIED MODAL */}
+            <AnimatePresence>
+                {showShareModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="bg-zinc-800 text-white text-sm sm:text-base font-medium px-6 py-4 rounded-2xl shadow-2xl border border-zinc-700 text-center"
+                        >
+                            Link copied
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
