@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LuListPlus, LuEllipsisVertical } from 'react-icons/lu';
+import { AnimatePresence, motion } from 'framer-motion';
+import { LuListPlus, LuEllipsisVertical, LuShare2 } from 'react-icons/lu';
 import { formatDuration } from '../../utils/formatTime.js';
 import PlaylistSaveModal from '../PlaylistModal/PlaylistSaveModal.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -17,6 +18,9 @@ export default function SearchVideoCard({ video }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
     const [modalMessage, setModalMessage] = useState("");
+
+    // --- Share Modal State ---
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     // --- Hooks ---
     const { user } = useAuth();
@@ -62,6 +66,20 @@ export default function SearchVideoCard({ video }) {
         e.stopPropagation();
         setIsMenuOpen(false);
         setIsModalOpen(true);
+    };
+
+    const handleShare = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsMenuOpen(false);
+        const url = `${window.location.origin}/watch/${video._id}`;
+        try {
+            await navigator.clipboard.writeText(url);
+        } catch (err) {
+            console.error('Failed to copy link:', err);
+        }
+        setIsShareModalOpen(true);
+        setTimeout(() => setIsShareModalOpen(false), 2000);
     };
 
     return (
@@ -127,6 +145,13 @@ export default function SearchVideoCard({ video }) {
                                     <LuListPlus size={18} />
                                     Add to playlist
                                 </button>
+                                <button
+                                    onClick={handleShare}
+                                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                                >
+                                    <LuShare2 size={18} />
+                                    Share
+                                </button>
                             </div>
                         )}
                     </div>
@@ -161,6 +186,23 @@ export default function SearchVideoCard({ video }) {
                     {video.description || "No description available for this video."}
                 </p>
             </div>
+
+            {/* SHARE LINK COPIED MODAL */}
+            <AnimatePresence>
+                {isShareModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="bg-zinc-800 text-white text-sm sm:text-base font-medium px-6 py-4 rounded-2xl shadow-2xl border border-zinc-700 text-center"
+                        >
+                            Link copied
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Playlist Save Modal Instance */}
             {isModalOpen && (
