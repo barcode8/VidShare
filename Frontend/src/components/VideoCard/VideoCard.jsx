@@ -80,7 +80,10 @@ export default function VideoCard({ video, hideAvatar = false, layout = "vertica
             </Link>
 
             {/* Details */}
-            <div className={`flex w-full ${isHorizontal ? 'gap-0 px-0' : 'gap-4 px-1'}`}>
+            <div
+                className={`flex flex-1 min-w-0 ${isHorizontal ? 'gap-0 px-0' : 'gap-4 px-1'
+                    }`}
+            >
                 {!hideAvatar && !isHorizontal && (
                     <Link to={channelUrl} className="shrink-0">
                         <img src={video.ownerDetails?.avatar || 'https://via.placeholder.com/150'} className="h-11 w-11 rounded-full object-cover border border-zinc-800" alt="avatar" />
