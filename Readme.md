@@ -136,28 +136,24 @@ Unlike a basic CRUD application, VidShare includes several production-inspired b
 # 🏛️ Architecture
 
 ```text
-                    React + Vite
-                          │
-                     Axios Requests
-                          │
-────────────────────────────────────────────────────
-                    Express REST API
-────────────────────────────────────────────────────
-                          │
-                Authentication Middleware
-                          │
-      ┌──────────────┬──────────────┬──────────────┐
-      │              │              │
-    Users         Videos        Social APIs
-      │              │              │
-      └──────────────┴──────────────┘
-                     Business Logic
-                          │
-                   Mongoose Models
-                          │
-                      MongoDB Atlas
-                          │
-          Cloudinary ← Upload Pipeline
+                    Browser
+                        │
+                  React + Vite
+                        │
+                 HTTPS (Nginx)
+                        │
+                 Express REST API
+                        │
+            Authentication Middleware
+                        │
+                 Business Logic Layer
+             ┌──────────┴──────────┐
+             │                     │
+      MongoDB Atlas          Cloudinary
+             │                     │
+             └──────────┬──────────┘
+                        │
+              Docker on Linux VPS
 ```
 
 ---
@@ -296,9 +292,6 @@ CLOUDINARY_API_SECRET=
 | Dashboard | Creator analytics |
 | Views | View tracking |
 
-> **TODO:** Add Swagger / Postman collection here.
-
----
 
 # 💡 Engineering Decisions
 
@@ -317,12 +310,10 @@ Some notable implementation decisions made during development:
 - Adaptive bitrate streaming (HLS)
 - Video transcoding queue
 - Redis caching
-- Notification system
 - Email verification
 - Live streaming
 - Recommendation engine
 - Unit & Integration tests
-- CI/CD pipeline
 - Kubernetes deployment
 
 ---
@@ -333,25 +324,27 @@ Some notable implementation decisions made during development:
 
 ### Upload Flow
 
-Add a GIF showing the upload process.
+![Upload Flow](./Readme-files/upload.gif)
 
 ---
 
 ### Authentication
 
-Add a GIF demonstrating login.
+![Authentication](./Readme-files/login.gif)
 
 ---
 
 ### Playlist Management
 
-Add a GIF.
+![Playlist Management](./Readme-files/playlist.gif)
 
 ---
 
 ### Dashboard
 
-Add screenshots.
+![Dashboard Overview](./Readme-files/channel.png)
+
+![Dashboard Edit](./Readme-files/dashboard.png)
 
 ---
 
