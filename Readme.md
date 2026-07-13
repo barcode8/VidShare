@@ -344,7 +344,7 @@ Some notable implementation decisions made during development:
 
 ![Dashboard Overview](./Readme-files/channel.png)
 
-![Dashboard Edit](./Readme-files/dashboard.png)
+![Dashboard Edit](./Readme-files/details.png)
 
 ---
 
