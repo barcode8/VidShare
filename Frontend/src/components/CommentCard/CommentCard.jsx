@@ -166,7 +166,7 @@ export default function CommentCard({ comment, onCommentDeleted, depth = 0, repl
                             <div className="relative" ref={menuRef}>
                                 <button
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="text-zinc-400 hover:text-white p-1 rounded-full hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100"
+                                    className="text-zinc-400 hover:text-white p-1 rounded-full hover:bg-zinc-800 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
                                 >
                                     <LuEllipsisVertical size={16} />
                                 </button>
