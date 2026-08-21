@@ -53,6 +53,13 @@ videoSchema.pre('deleteOne', {document : true, query : false}, async function (n
         }
 
         //The true beauty is that once this comment.deleteOne() is called, the other pre hook for the comment will fire meaning all comments will be pruned too at the same time
+
+        //We also need to remove the videoId from the playlist when we delete a video
+        await mongoose.model("Playlist").updateMany(
+            {videos : videoId},
+            {$pull : {videos : videoId} }
+        );
+        //Before this, whenever we deleted a video our playlist counter would stil count the video inside it as that videoId still existed in the array
     } catch (error) {
         next(error);
     }
