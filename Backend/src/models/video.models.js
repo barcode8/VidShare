@@ -37,6 +37,27 @@ const videoSchema= new Schema({
     }
 },{timestamps: true})
 
+videoSchema.pre('deleteOne', {document : true, query : false}, async function (next){
+    const videoId = this._id;
+
+    try {
+        //Delete all likes associated with the video itself
+        await mongoose.model("Like").deleteMany({video : videoId})
+
+        //Find all comments on the video
+        const comments = await mongoose.model("Comment").find({ video : videoId});
+
+        //Delete all comments associated with the video
+        for(const comment of comments){
+            await comment.deleteOne();
+        }
+
+        //The true beauty is that once this comment.deleteOne() is called, the other pre hook for the comment will fire meaning all comments will be pruned too at the same time
+    } catch (error) {
+        next(error);
+    }
+})
+
 videoSchema.plugin(mongooseAggregatePaginate)
 
 export const Video= mongoose.model("Video",videoSchema)

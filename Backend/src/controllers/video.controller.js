@@ -463,15 +463,11 @@ const deleteVideo = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to delete associated files from cloud storage");
     }
 
-    const response = await Video.findByIdAndDelete(videoId)
-
-    if(!response){
-        throw new ApiError(404, "Video could not be fetched")
-    }
+    await video.deleteOne();
 
     return res
     .status(200)
-    .json(new ApiResponse(200, response, "Video deleted successfully"))
+    .json(new ApiResponse(200, {deletedVideoId : videoId}, "Video deleted successfully"))
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
