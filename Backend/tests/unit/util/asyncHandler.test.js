@@ -35,4 +35,41 @@ describe("asyncHandler", () => {
             message : "User not found"
         })
     })
+
+    it("defaults to code 500 when status code not provided", async () => {
+        const req = {};
+        const res = {
+            status : vi.fn().mockReturnThis(),
+            json : vi.fn()
+        };
+        const next = vi.fn()
+
+        const func = vi.fn().mockRejectedValue(new Error("User not found"));
+        const handler = asyncHandler(func);
+        await handler(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(500)
+    })
+
+    it("also resolves synchronous errors", async () => {
+        const req = {};
+        const res = {
+            status : vi.fn().mockReturnThis(),
+            json : vi.fn()
+        };
+        const next = vi.fn()
+
+        const func = vi.fn(()=>{
+            throw new ApiError(400, "Bad request")
+        });
+        const handler = asyncHandler(func);
+        await handler(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(400)
+
+        expect(res.json).toHaveBeenCalledWith({
+            success: false,
+            message: "Bad request"
+        });
+    })
 })
