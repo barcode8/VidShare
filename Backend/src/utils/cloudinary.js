@@ -38,7 +38,6 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
         });
 
     } catch (error) {
-        console.error("!!! CLOUDINARY UPLOAD ERROR !!!", error);
         return null;
     }
 };
