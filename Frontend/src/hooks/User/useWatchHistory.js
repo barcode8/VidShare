@@ -16,7 +16,7 @@ export const useWatchHistory = ()=>{
                     withCredentials : true
                 })
                 const historyData = response.data.data || []
-                setWatchHistory(historyData.reverse())
+                setWatchHistory(historyData)
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to fetch watch history");
             } finally {

@@ -452,7 +452,8 @@ const addVideoToWatchHistory = asyncHandler(async (req, res) => {
             $push: {
                 watchHistory : {
                     $each : [videoId],
-                    $slice : -50
+                    $position : 0,
+                    $slice : 50
                 }
             }
         },
