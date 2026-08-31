@@ -108,7 +108,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 const initVideoUpload = asyncHandler(async (req,res)=>{
-    // 1. Generate a valid MongoDB ID in memory. NO database insert
+    // Generate a valid MongoDB ID in memory. NO database insert
     const futureVideoId = new mongoose.Types.ObjectId();
 
     return res
@@ -146,8 +146,8 @@ const publishVideoDraft = asyncHandler(async (req, res) => {
     processVideoBackground(video._id, req.user._id, title, videoLocalPath, thumbnailLocalPath).catch(console.error)
 
     //Sending this response so that the request stops processing
-    return res.status(200).json(
-        new ApiResponse(200, video, "Video is uploading and processing in the background")
+    return res.status(202).json(
+        new ApiResponse(202, video, "Video is uploading and processing in the background")
     )
 })
 
@@ -159,7 +159,6 @@ async function processVideoBackground(videoId, ownerId, title, videoLocalPath, t
         if (!videoUpload) {
             console.error("Cloudinary response:", videoUpload)
             await Video.findByIdAndDelete(videoId);
-            return;
 
             //Send and write a failed notification
             const failedNotif = await Notification.create({ user: ownerId, message: `Upload failed: We couldn't process your video "${title}".` });
@@ -205,8 +204,6 @@ async function processVideoBackground(videoId, ownerId, title, videoLocalPath, t
             isPublished: true
         });
 
-        console.log("DEBUG: Database update successful for video:", videoId);
-
         //We emit and create a successfull notification
         const successNotif = await Notification.create({
             user: ownerId,
@@ -216,7 +213,7 @@ async function processVideoBackground(videoId, ownerId, title, videoLocalPath, t
         notificationEmitter.emit(`notify-${ownerId}`, successNotif);
 
     } catch (error) {
-        console.error("!!! BACKGROUND PROCESS FAILED !!!", error);
+        console.error("BACKGROUND PROCESS FAILED", error);
         
         //We emit and create a baseline failed notification
         const errorNotif = await Notification.create({
